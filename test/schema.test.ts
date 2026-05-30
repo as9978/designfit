@@ -29,6 +29,15 @@ describe("ToolInputSchema", () => {
     };
     expect(() => ToolInputSchema.parse(bad)).toThrow();
   });
+  it("rejects an empty tokenSources entry at the boundary", () => {
+    const bad = {
+      ...validInput,
+      design: {
+        root: { id: "root", name: "Screen", frame: { x: 0, y: 0, w: 1440, h: 900 }, tokens: { fill: "#1d4ed8" }, tokenSources: { fill: "" }, children: [] },
+      },
+    };
+    expect(() => ToolInputSchema.parse(bad)).toThrow();
+  });
 });
 
 describe("mergeTolerances", () => {
