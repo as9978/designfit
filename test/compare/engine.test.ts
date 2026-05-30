@@ -76,6 +76,20 @@ describe("validate", () => {
     expect(result.violations.some((v) => v.property === "exists")).toBe(true);
   });
 
+  it("de-duplicates repeated componentMap entries so checks/violations aren't double-counted", () => {
+    const measure: MeasureResult = {
+      measurements: [
+        { figmaNodeId: "root", found: true, box: { x: 0, y: 0, w: 400, h: 300 }, styles: {} },
+        { figmaNodeId: "btn", found: true, box: { x: 24, y: 24, w: 120, h: 40 }, styles: { fill: "#ff0000", fontSize: 16 } },
+      ],
+      domIds: ["root", "btn"],
+    };
+    const dupMap: MapEntry[] = [{ figmaNodeId: "root" }, { figmaNodeId: "btn" }, { figmaNodeId: "btn" }];
+    const result = validate(spec, measure, dupMap, { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    const fillViolations = result.violations.filter((v) => v.check === "token" && v.property === "fill");
+    expect(fillViolations).toHaveLength(1);
+  });
+
   it("is deterministic — identical input yields byte-identical output (anti-oscillation guarantee)", () => {
     const measure: MeasureResult = {
       measurements: [

@@ -7,7 +7,12 @@ import type {
   TokenProperty,
   Violation,
 } from "../types";
-import { deltaE } from "../color";
+import { deltaE, alphaOf } from "../color";
+
+/** Round to 3 decimals so sub-pixel/float-subtraction noise never reaches the output string. */
+function round3(n: number): number {
+  return Math.round(n * 1000) / 1000;
+}
 
 function label(node: DesignNode): string {
   return `${node.name}#${node.id}`;
@@ -29,12 +34,19 @@ function colorCheck(node: DesignNode, property: TokenProperty, expected: string,
     };
   }
   const d = deltaE(expected, actual);
-  if (d <= tolDeltaE) return null;
+  const aExp = alphaOf(expected);
+  const aAct = alphaOf(actual);
+  const alphaMismatch =
+    Number.isFinite(aExp) && Number.isFinite(aAct) && Math.abs(aExp - aAct) > 0.01;
+  if (d <= tolDeltaE && !alphaMismatch) return null;
+  const parts: string[] = [];
+  if (d > tolDeltaE) parts.push(`ΔE ${d.toFixed(1)}`);
+  if (alphaMismatch) parts.push(`alpha ${aAct.toFixed(2)} vs ${aExp.toFixed(2)}`);
   return {
     ...base(node, property, source),
     expected: { value: expected, source },
     actual: { value: actual },
-    delta: `ΔE ${d.toFixed(1)} (${actual} vs ${expected})`,
+    delta: `${parts.join(", ")} (${actual} vs ${expected})`,
     fixHint: `use ${source ?? expected} (${expected})`,
   };
 }
@@ -51,13 +63,14 @@ function numericCheck(node: DesignNode, property: TokenProperty, expected: numbe
     };
   }
   if (Math.abs(expected - actual) <= tolPx) return null;
-  const signed = actual - expected;
+  const signed = round3(actual - expected);
+  const shownActual = round3(actual);
   const sign = signed >= 0 ? "+" : "";
   return {
     ...base(node, property, source),
     expected: { value: `${expected}${unit}`, source },
-    actual: { value: `${actual}${unit}` },
-    delta: `${sign}${signed}${unit} (${actual} vs ${expected})`,
+    actual: { value: `${shownActual}${unit}` },
+    delta: `${sign}${signed}${unit} (${shownActual} vs ${expected})`,
     fixHint: `set ${property} to ${expected}${unit}${source ? ` (token ${source})` : ""}`,
   };
 }

@@ -30,7 +30,20 @@ export async function measure(
   try {
     const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
     const page = await context.newPage();
-    await page.goto(url, { waitUntil: "networkidle", timeout });
+    // "load" (not "networkidle") so live dev servers with a persistent HMR/SSE
+    // connection don't keep a request in-flight forever and time out.
+    await page.goto(url, { waitUntil: "load", timeout });
+    // Wait for web fonts so text-driven box geometry is stable. Bounded so a
+    // never-settling font load can't hang the measurement; a no-op on font-less pages.
+    await page
+      .evaluate(
+        () =>
+          Promise.race([
+            document.fonts ? document.fonts.ready : Promise.resolve(),
+            new Promise((resolve) => setTimeout(resolve, 2000)),
+          ]).then(() => true),
+      )
+      .catch(() => undefined);
 
     const raw = await page.evaluate((sels) => {
       const read = (el: Element) => {

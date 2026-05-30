@@ -52,4 +52,21 @@ describe("compareTokens", () => {
     expect(out.checks).toBe(1);
     expect(out.violations).toEqual([]);
   });
+
+  it("flags a color whose alpha differs even when the hue matches (no silent transparent pass)", () => {
+    // #1d4ed880 = the design blue at ~50% alpha; CIEDE2000 ignores alpha, so without
+    // the alpha check this would pass at ΔE 0 despite being visibly half-transparent.
+    const out = compareTokens(node({ fill: "#1d4ed8" }), { fill: "#1d4ed880" }, DEFAULT_TOLERANCES);
+    expect(out.violations).toHaveLength(1);
+    expect(out.violations[0]!.property).toBe("fill");
+    expect(out.violations[0]!.delta).toContain("alpha");
+  });
+
+  it("rounds numeric deltas so sub-pixel float noise never reaches the output string", () => {
+    const out = compareTokens(node({ fontSize: 16 }), { fontSize: 18.6 }, DEFAULT_TOLERANCES);
+    expect(out.violations).toHaveLength(1);
+    expect(out.violations[0]!.delta).toContain("+2.6");
+    expect(out.violations[0]!.delta).not.toMatch(/\d{6,}/); // no "2.6000000000000014" noise
+    expect(out.violations[0]!.actual.value).toBe("18.6px");
+  });
 });

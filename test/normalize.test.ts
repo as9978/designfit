@@ -58,4 +58,9 @@ describe("normalizeStyles", () => {
     const s = normalizeStyles({ ...raw, backgroundColor: "rgba(0, 0, 0, 0)" });
     expect(s.fill).toBeUndefined();
   });
+
+  it("preserves partial alpha as an 8-digit hex so transparency is not dropped", () => {
+    const s = normalizeStyles({ ...raw, backgroundColor: "rgba(29, 78, 216, 0.5)" });
+    expect(s.fill).toMatch(/^#1d4ed8[0-9a-f]{2}$/);
+  });
 });

@@ -35,14 +35,21 @@ export function validate(
   const designById = flattenDesign(spec);
   const measById = new Map(measure.measurements.map((m) => [m.figmaNodeId, m]));
 
+  // De-duplicate the component map by figmaNodeId so a repeated entry can't
+  // double-count checks/violations (geometry already iterates the deduped measById).
+  const seenIds = new Set<string>();
+  const uniqueMap = componentMap.filter((e) =>
+    seenIds.has(e.figmaNodeId) ? false : (seenIds.add(e.figmaNodeId), true),
+  );
+
   const violations: Violation[] = [];
   let totalChecks = 0;
 
-  const presence = checkPresence(componentMap, measure.measurements, measure.domIds, designById);
+  const presence = checkPresence(uniqueMap, measure.measurements, measure.domIds, designById);
   violations.push(...presence.violations);
   totalChecks += presence.checks;
 
-  for (const entry of componentMap) {
+  for (const entry of uniqueMap) {
     const node = designById.get(entry.figmaNodeId);
     const m = measById.get(entry.figmaNodeId);
     if (!node || !m || !m.found) continue; // misses are already counted by presence
