@@ -20,6 +20,15 @@ describe("ToolInputSchema", () => {
   it("rejects a non-positive viewport", () => {
     expect(() => ToolInputSchema.parse({ ...validInput, viewport: { width: 0, height: 900 } })).toThrow();
   });
+  it("rejects a malformed design-token color at the boundary", () => {
+    const bad = {
+      ...validInput,
+      design: {
+        root: { id: "root", name: "Screen", frame: { x: 0, y: 0, w: 1440, h: 900 }, tokens: { fill: "blurple" }, children: [] },
+      },
+    };
+    expect(() => ToolInputSchema.parse(bad)).toThrow();
+  });
 });
 
 describe("mergeTolerances", () => {
