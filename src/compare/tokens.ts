@@ -18,12 +18,22 @@ function label(node: DesignNode): string {
   return `${node.name}#${node.id}`;
 }
 
+/**
+ * A property is "enforced" when its node declares a tokenSources ENTRY for it — i.e.
+ * it is bound to a Figma variable. Keyed on key PRESENCE, not value truthiness, so an
+ * explicit (even empty) entry still enforces and an empty token name can't silently
+ * downgrade a token-bound property to advisory.
+ */
+function isEnforced(node: DesignNode, property: string): boolean {
+  return node.tokenSources != null && Object.prototype.hasOwnProperty.call(node.tokenSources, property);
+}
+
 function base(node: DesignNode, property: string, source: string | undefined): Pick<Violation, "component" | "check" | "property" | "severity"> & { source?: string } {
-  // Token-bound properties (a Figma variable named in tokenSources) are enforced as
-  // errors. A hardcoded literal (no token to anchor a semantic fix to) is advisory:
-  // a mismatch is a warn that surfaces but never fails the run — the spec's
-  // "hardcoded (non-token) value → emit a warn, don't fail" rule.
-  return { component: label(node), check: "token", property, severity: source ? "error" : "warn", source };
+  // Token-bound properties (bound to a Figma variable via tokenSources) are enforced as
+  // errors. A hardcoded literal (no tokenSources entry, no token to anchor a semantic
+  // fix to) is advisory: a mismatch is a warn that surfaces but never fails the run —
+  // the spec's "hardcoded (non-token) value → emit a warn, don't fail" rule.
+  return { component: label(node), check: "token", property, severity: isEnforced(node, property) ? "error" : "warn", source };
 }
 
 function colorCheck(node: DesignNode, property: TokenProperty, expected: string, actual: string | undefined, tolDeltaE: number): Violation | null {
@@ -110,11 +120,14 @@ export function compareTokens(node: DesignNode, styles: ResolvedStyles | undefin
   const violations: Violation[] = [];
   let checks = 0;
 
-  const push = (v: Violation | null) => {
-    checks += 1;
+  const push = (property: TokenProperty, v: Violation | null) => {
+    // Only enforced (token-bound) properties contribute to the fidelity score. A
+    // hardcoded literal's check is "skipped" from scoring per the spec — its mismatch
+    // is an advisory warn that surfaces but neither counts toward `checks` nor fails.
+    if (isEnforced(node, property)) checks += 1;
     if (v) {
-      // A token violation is only `warn` when the property has no tokenSources entry,
-      // i.e. it's a hardcoded literal — say so, since its fix can only be a magic number.
+      // A token violation is only `warn` for a hardcoded property (no tokenSources
+      // entry) — say so, since its fix can only ever be a magic number.
       if (v.severity === "warn") {
         v.fixHint += " — hardcoded value (no Figma token); bind it to a token to enforce, or omit it if intentional";
       }
@@ -122,17 +135,17 @@ export function compareTokens(node: DesignNode, styles: ResolvedStyles | undefin
     }
   };
 
-  if (t.fill !== undefined) push(colorCheck(node, "fill", t.fill, s.fill, tol.color.deltaE));
-  if (t.color !== undefined) push(colorCheck(node, "color", t.color, s.color, tol.color.deltaE));
-  if (t.borderColor !== undefined) push(colorCheck(node, "borderColor", t.borderColor, s.borderColor, tol.color.deltaE));
-  if (t.fontSize !== undefined) push(numericCheck(node, "fontSize", t.fontSize, s.fontSize, tol.fontSize.px));
-  if (t.lineHeight !== undefined) push(numericCheck(node, "lineHeight", t.lineHeight, s.lineHeight, tol.lineHeight.px));
-  if (t.letterSpacing !== undefined) push(numericCheck(node, "letterSpacing", t.letterSpacing, s.letterSpacing, tol.letterSpacing.px));
-  if (t.borderWidth !== undefined) push(numericCheck(node, "borderWidth", t.borderWidth, s.borderWidth, tol.borderWidth.px));
-  if (t.borderRadius !== undefined) push(numericCheck(node, "borderRadius", t.borderRadius, s.borderRadius, tol.borderRadius.px));
-  if (t.fontWeight !== undefined) push(exactCheck(node, "fontWeight", t.fontWeight, s.fontWeight));
-  if (t.opacity !== undefined) push(numericCheck(node, "opacity", t.opacity, s.opacity, 0.01, ""));
-  if (t.fontFamily !== undefined) push(familyCheck(node, t.fontFamily, s.fontFamily));
+  if (t.fill !== undefined) push("fill", colorCheck(node, "fill", t.fill, s.fill, tol.color.deltaE));
+  if (t.color !== undefined) push("color", colorCheck(node, "color", t.color, s.color, tol.color.deltaE));
+  if (t.borderColor !== undefined) push("borderColor", colorCheck(node, "borderColor", t.borderColor, s.borderColor, tol.color.deltaE));
+  if (t.fontSize !== undefined) push("fontSize", numericCheck(node, "fontSize", t.fontSize, s.fontSize, tol.fontSize.px));
+  if (t.lineHeight !== undefined) push("lineHeight", numericCheck(node, "lineHeight", t.lineHeight, s.lineHeight, tol.lineHeight.px));
+  if (t.letterSpacing !== undefined) push("letterSpacing", numericCheck(node, "letterSpacing", t.letterSpacing, s.letterSpacing, tol.letterSpacing.px));
+  if (t.borderWidth !== undefined) push("borderWidth", numericCheck(node, "borderWidth", t.borderWidth, s.borderWidth, tol.borderWidth.px));
+  if (t.borderRadius !== undefined) push("borderRadius", numericCheck(node, "borderRadius", t.borderRadius, s.borderRadius, tol.borderRadius.px));
+  if (t.fontWeight !== undefined) push("fontWeight", exactCheck(node, "fontWeight", t.fontWeight, s.fontWeight));
+  if (t.opacity !== undefined) push("opacity", numericCheck(node, "opacity", t.opacity, s.opacity, 0.01, ""));
+  if (t.fontFamily !== undefined) push("fontFamily", familyCheck(node, t.fontFamily, s.fontFamily));
 
   return { violations, checks };
 }

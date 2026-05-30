@@ -103,6 +103,38 @@ describe("validate", () => {
     expect(result.score).toBe(100);
   });
 
+  it("hardcoded token mismatches are score-neutral — they neither raise nor lower the score", () => {
+    // Same measurements; two specs differing only in extra HARDCODED (no-tokenSources)
+    // properties that all mismatch. The score must be identical (hardcoded checks are
+    // skipped from scoring) — adding broken hardcoded props can't pad the denominator.
+    const measure: MeasureResult = {
+      measurements: [
+        { figmaNodeId: "root", found: true, box: { x: 0, y: 0, w: 400, h: 300 }, styles: {} },
+        { figmaNodeId: "btn", found: true, box: { x: 24, y: 24, w: 120, h: 40 }, styles: { fill: "#ff0000", fontSize: 99 } },
+      ],
+      domIds: ["root", "btn"],
+    };
+    const map: MapEntry[] = [{ figmaNodeId: "root" }, { figmaNodeId: "btn" }];
+    const withHardcoded: DesignSpec = {
+      root: {
+        id: "root", name: "Screen", frame: { x: 0, y: 0, w: 400, h: 300 }, tokens: {},
+        children: [{ id: "btn", name: "Button", frame: { x: 24, y: 24, w: 120, h: 40 }, tokens: { fill: "#1d4ed8", fontSize: 16 }, children: [] }],
+      },
+    };
+    const noTokens: DesignSpec = {
+      root: {
+        id: "root", name: "Screen", frame: { x: 0, y: 0, w: 400, h: 300 }, tokens: {},
+        children: [{ id: "btn", name: "Button", frame: { x: 24, y: 24, w: 120, h: 40 }, tokens: {}, children: [] }],
+      },
+    };
+    const a = validate(withHardcoded, measure, map, { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    const b = validate(noTokens, measure, map, { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    expect(a.score).toBe(b.score);
+    expect(a.score).toBe(100); // geometry + presence all pass; the two hardcoded mismatches don't move it
+    expect(a.pass).toBe(true);
+    expect(a.violations.filter((v) => v.severity === "warn").length).toBe(2); // both surface as advisories
+  });
+
   it("de-duplicates repeated componentMap entries so checks/violations aren't double-counted", () => {
     const measure: MeasureResult = {
       measurements: [

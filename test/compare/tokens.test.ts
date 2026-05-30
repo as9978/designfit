@@ -16,7 +16,11 @@ const node = (tokens: DesignNode["tokens"], sources?: DesignNode["tokenSources"]
 describe("compareTokens", () => {
   it("passes when every declared token is within tolerance", () => {
     const styles: ResolvedStyles = { fill: "#1d4ed8", fontSize: 16 };
-    const out = compareTokens(node({ fill: "#1d4ed8", fontSize: 16 }), styles, DEFAULT_TOLERANCES);
+    const out = compareTokens(
+      node({ fill: "#1d4ed8", fontSize: 16 }, { fill: "color/primary", fontSize: "size/body" }),
+      styles,
+      DEFAULT_TOLERANCES,
+    );
     expect(out.violations).toEqual([]);
     expect(out.checks).toBe(2);
   });
@@ -47,10 +51,15 @@ describe("compareTokens", () => {
     expect(out.violations[0]!.actual.value).toBe("none");
   });
 
-  it("only counts checks for declared tokens", () => {
-    const out = compareTokens(node({ fontWeight: 700 }), { fontWeight: 700 }, DEFAULT_TOLERANCES);
-    expect(out.checks).toBe(1);
-    expect(out.violations).toEqual([]);
+  it("counts only enforced (token-bound) properties toward checks; hardcoded ones are score-neutral", () => {
+    const enforced = compareTokens(node({ fontWeight: 700 }, { fontWeight: "weight/bold" }), { fontWeight: 700 }, DEFAULT_TOLERANCES);
+    expect(enforced.checks).toBe(1);
+    expect(enforced.violations).toEqual([]);
+
+    const hardcoded = compareTokens(node({ fontWeight: 700 }), { fontWeight: 400 }, DEFAULT_TOLERANCES);
+    expect(hardcoded.checks).toBe(0); // skipped from scoring
+    expect(hardcoded.violations).toHaveLength(1); // but still surfaced as an advisory
+    expect(hardcoded.violations[0]!.severity).toBe("warn");
   });
 
   it("flags a color whose alpha differs even when the hue matches (no silent transparent pass)", () => {
@@ -81,5 +90,14 @@ describe("compareTokens", () => {
     const out = compareTokens(node({ fontSize: 16 }, { fontSize: "size/body" }), { fontSize: 20 }, DEFAULT_TOLERANCES);
     expect(out.violations[0]!.severity).toBe("error");
     expect(out.violations[0]!.fixHint).not.toContain("hardcoded");
+  });
+
+  it("treats an explicit (even empty-string) tokenSources entry as enforced, not hardcoded", () => {
+    // Enforcement keys off entry PRESENCE, not value truthiness: a present-but-empty
+    // entry must not falsy-collapse a token-bound property to an advisory warn.
+    const out = compareTokens(node({ fill: "#1d4ed8" }, { fill: "" }), { fill: "#ff0000" }, DEFAULT_TOLERANCES);
+    expect(out.violations[0]!.severity).toBe("error");
+    expect(out.violations[0]!.fixHint).not.toContain("hardcoded");
+    expect(out.checks).toBe(1);
   });
 });
