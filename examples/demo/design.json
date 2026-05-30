@@ -1,0 +1,23 @@
+{
+  "url": "file://REPLACE_WITH_ABSOLUTE_PATH/examples/demo/index.html",
+  "viewport": { "width": 400, "height": 300 },
+  "design": {
+    "root": {
+      "id": "root",
+      "name": "Screen",
+      "frame": { "x": 0, "y": 0, "w": 400, "h": 300 },
+      "tokens": {},
+      "children": [
+        {
+          "id": "btn",
+          "name": "Button/Primary",
+          "frame": { "x": 24, "y": 24, "w": 120, "h": 40 },
+          "tokens": { "fill": "#1d4ed8", "color": "#ffffff", "fontSize": 16, "borderRadius": 8 },
+          "tokenSources": { "fill": "color/primary" },
+          "children": []
+        }
+      ]
+    }
+  },
+  "componentMap": [{ "figmaNodeId": "root" }, { "figmaNodeId": "btn" }]
+}
