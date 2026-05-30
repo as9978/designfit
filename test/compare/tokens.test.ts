@@ -69,4 +69,17 @@ describe("compareTokens", () => {
     expect(out.violations[0]!.delta).not.toMatch(/\d{6,}/); // no "2.6000000000000014" noise
     expect(out.violations[0]!.actual.value).toBe("18.6px");
   });
+
+  it("downgrades a hardcoded (no tokenSources) mismatch to a warn, not an error", () => {
+    const out = compareTokens(node({ fill: "#1d4ed8" }), { fill: "#ff0000" }, DEFAULT_TOLERANCES);
+    expect(out.violations).toHaveLength(1);
+    expect(out.violations[0]!.severity).toBe("warn");
+    expect(out.violations[0]!.fixHint).toContain("hardcoded");
+  });
+
+  it("keeps a token-bound (has tokenSources) mismatch as a hard error", () => {
+    const out = compareTokens(node({ fontSize: 16 }, { fontSize: "size/body" }), { fontSize: 20 }, DEFAULT_TOLERANCES);
+    expect(out.violations[0]!.severity).toBe("error");
+    expect(out.violations[0]!.fixHint).not.toContain("hardcoded");
+  });
 });

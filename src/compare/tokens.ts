@@ -19,7 +19,11 @@ function label(node: DesignNode): string {
 }
 
 function base(node: DesignNode, property: string, source: string | undefined): Pick<Violation, "component" | "check" | "property" | "severity"> & { source?: string } {
-  return { component: label(node), check: "token", property, severity: "error", source };
+  // Token-bound properties (a Figma variable named in tokenSources) are enforced as
+  // errors. A hardcoded literal (no token to anchor a semantic fix to) is advisory:
+  // a mismatch is a warn that surfaces but never fails the run — the spec's
+  // "hardcoded (non-token) value → emit a warn, don't fail" rule.
+  return { component: label(node), check: "token", property, severity: source ? "error" : "warn", source };
 }
 
 function colorCheck(node: DesignNode, property: TokenProperty, expected: string, actual: string | undefined, tolDeltaE: number): Violation | null {
@@ -108,7 +112,14 @@ export function compareTokens(node: DesignNode, styles: ResolvedStyles | undefin
 
   const push = (v: Violation | null) => {
     checks += 1;
-    if (v) violations.push(v);
+    if (v) {
+      // A token violation is only `warn` when the property has no tokenSources entry,
+      // i.e. it's a hardcoded literal — say so, since its fix can only be a magic number.
+      if (v.severity === "warn") {
+        v.fixHint += " — hardcoded value (no Figma token); bind it to a token to enforce, or omit it if intentional";
+      }
+      violations.push(v);
+    }
   };
 
   if (t.fill !== undefined) push(colorCheck(node, "fill", t.fill, s.fill, tol.color.deltaE));

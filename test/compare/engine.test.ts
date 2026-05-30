@@ -76,6 +76,33 @@ describe("validate", () => {
     expect(result.violations.some((v) => v.property === "exists")).toBe(true);
   });
 
+  it("does not fail the run for hardcoded (non-token) mismatches — they are warns", () => {
+    const hardcodedSpec: DesignSpec = {
+      root: {
+        id: "root",
+        name: "Screen",
+        frame: { x: 0, y: 0, w: 400, h: 300 },
+        tokens: {},
+        children: [
+          // fill is declared but NOT in tokenSources -> a hardcoded literal.
+          { id: "btn", name: "Button", frame: { x: 24, y: 24, w: 120, h: 40 }, tokens: { fill: "#1d4ed8" }, children: [] },
+        ],
+      },
+    };
+    const measure: MeasureResult = {
+      measurements: [
+        { figmaNodeId: "root", found: true, box: { x: 0, y: 0, w: 400, h: 300 }, styles: {} },
+        { figmaNodeId: "btn", found: true, box: { x: 24, y: 24, w: 120, h: 40 }, styles: { fill: "#ff0000" } },
+      ],
+      domIds: ["root", "btn"],
+    };
+    const result = validate(hardcodedSpec, measure, [{ figmaNodeId: "root" }, { figmaNodeId: "btn" }], { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    expect(result.violations.some((v) => v.check === "token" && v.severity === "warn")).toBe(true);
+    expect(result.violations.every((v) => v.severity !== "error")).toBe(true);
+    expect(result.pass).toBe(true);
+    expect(result.score).toBe(100);
+  });
+
   it("de-duplicates repeated componentMap entries so checks/violations aren't double-counted", () => {
     const measure: MeasureResult = {
       measurements: [
