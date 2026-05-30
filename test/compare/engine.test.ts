@@ -1,0 +1,91 @@
+// test/compare/engine.test.ts
+import { describe, it, expect } from "vitest";
+import { flattenDesign, validate } from "../../src/compare/engine";
+import { DEFAULT_TOLERANCES } from "../../src/defaults";
+import type { DesignSpec, MapEntry, MeasureResult } from "../../src/types";
+
+const spec: DesignSpec = {
+  root: {
+    id: "root",
+    name: "Screen",
+    frame: { x: 0, y: 0, w: 400, h: 300 },
+    tokens: {},
+    children: [
+      {
+        id: "btn",
+        name: "Button/Primary",
+        frame: { x: 24, y: 24, w: 120, h: 40 },
+        tokens: { fill: "#1d4ed8", fontSize: 16 },
+        tokenSources: { fill: "color/primary" },
+        children: [],
+      },
+    ],
+  },
+};
+
+const map: MapEntry[] = [{ figmaNodeId: "root" }, { figmaNodeId: "btn" }];
+
+describe("flattenDesign", () => {
+  it("indexes every node by id", () => {
+    const byId = flattenDesign(spec);
+    expect([...byId.keys()].sort()).toEqual(["btn", "root"]);
+  });
+});
+
+describe("validate", () => {
+  it("passes with score 100 when the implementation matches", () => {
+    const measure: MeasureResult = {
+      measurements: [
+        { figmaNodeId: "root", found: true, box: { x: 0, y: 0, w: 400, h: 300 }, styles: {} },
+        { figmaNodeId: "btn", found: true, box: { x: 24, y: 24, w: 120, h: 40 }, styles: { fill: "#1d4ed8", fontSize: 16 } },
+      ],
+      domIds: ["root", "btn"],
+    };
+    const result = validate(spec, measure, map, { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    expect(result.pass).toBe(true);
+    expect(result.score).toBe(100);
+    expect(result.violations).toEqual([]);
+  });
+
+  it("collects token, geometry, and presence violations together and drops the score", () => {
+    const measure: MeasureResult = {
+      measurements: [
+        { figmaNodeId: "root", found: true, box: { x: 0, y: 0, w: 400, h: 300 }, styles: {} },
+        { figmaNodeId: "btn", found: true, box: { x: 24, y: 24, w: 200, h: 40 }, styles: { fill: "#ff0000", fontSize: 16 } },
+      ],
+      domIds: ["root", "btn"],
+    };
+    const result = validate(spec, measure, map, { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    expect(result.pass).toBe(false);
+    expect(result.violations.some((v) => v.check === "token" && v.property === "fill")).toBe(true);
+    expect(result.violations.some((v) => v.check === "geometry" && v.property === "width")).toBe(true);
+    expect(result.score).toBeLessThan(100);
+  });
+
+  it("reports a missing component and still returns a result", () => {
+    const measure: MeasureResult = {
+      measurements: [
+        { figmaNodeId: "root", found: true, box: { x: 0, y: 0, w: 400, h: 300 }, styles: {} },
+        { figmaNodeId: "btn", found: false },
+      ],
+      domIds: ["root"],
+    };
+    const result = validate(spec, measure, map, { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    expect(result.pass).toBe(false);
+    expect(result.unmapped.inDesignNotFound).toEqual(["btn"]);
+    expect(result.violations.some((v) => v.property === "exists")).toBe(true);
+  });
+
+  it("is deterministic — identical input yields byte-identical output (anti-oscillation guarantee)", () => {
+    const measure: MeasureResult = {
+      measurements: [
+        { figmaNodeId: "root", found: true, box: { x: 0, y: 0, w: 400, h: 300 }, styles: {} },
+        { figmaNodeId: "btn", found: true, box: { x: 24, y: 24, w: 200, h: 40 }, styles: { fill: "#ff0000", fontSize: 16 } },
+      ],
+      domIds: ["root", "btn"],
+    };
+    const a = validate(spec, measure, map, { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    const b = validate(spec, measure, map, { width: 400, height: 300 }, DEFAULT_TOLERANCES);
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+  });
+});
