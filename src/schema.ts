@@ -38,7 +38,7 @@ const DesignNodeSchema: z.ZodType<DesignNode> = z.lazy(() =>
     name: z.string(),
     frame: FrameSchema,
     tokens: TokensSchema,
-    tokenSources: z.record(z.string()).optional(),
+    tokenSources: z.record(z.string().min(1)).optional(),
     children: z.array(DesignNodeSchema),
   }),
 );
