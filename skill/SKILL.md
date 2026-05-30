@@ -62,6 +62,7 @@ Re-run `designfit_validate`. **Stop when `pass` is `true`.** If the `score` does
 
 ## Notes
 
+- **Every token you declare is enforced as a hard requirement** — a mismatch is an `error` that fails the run and lowers the score. Declare only the values you want designfit to enforce; omit intentionally-hardcoded or purely-decorative values rather than letting them gate fidelity. (`tokenSources` only enriches fix hints; it does not change severity.)
 - v1 validates **one viewport**. Validate the breakpoint the frame was designed at.
 - Geometry is compared relative to the root, so a correctly-built screen that's merely centered or offset still passes.
 - Tolerances default to ±2px geometry and ΔE ≤ 2 color. Pass `tolerances` to loosen/tighten per project.

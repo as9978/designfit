@@ -23,9 +23,13 @@ Add to your MCP client (e.g. Claude Code):
 { "mcpServers": { "designfit": { "command": "designfit" } } }
 ```
 
+> **Windows:** some MCP clients can't spawn a bare `designfit` (it resolves to `designfit.cmd`). Use `{ "command": "npx", "args": ["-y", "designfit"] }`, or point at the binary directly with `{ "command": "node", "args": ["<absolute-path>/node_modules/designfit/dist/index.js"] }`.
+
 ## Use
 
 Connect Figma's MCP too, then ask your agent to implement a frame. The `designfit-fidelity-loop` skill drives: build → tag elements with `data-designfit-id` → `designfit_validate` → fix → repeat until `pass`.
+
+The skill ships in the package at `skill/SKILL.md`. Skills aren't auto-loaded from an npm dependency — copy it into your agent's skills directory (for Claude Code: `.claude/skills/designfit-fidelity-loop/SKILL.md`) so it can be discovered.
 
 The one tool, `designfit_validate`, takes `{ url, viewport, design, componentMap, tolerances? }` and returns `{ pass, score, violations, unmapped }`.
 
