@@ -1,0 +1,27 @@
+{
+  "name": "trueup",
+  "version": "0.1.0",
+  "description": "Validate AI-built front-ends against their Figma design — deterministic token + geometry conformance in an agent loop.",
+  "type": "module",
+  "bin": { "trueup": "dist/index.js" },
+  "files": ["dist", "skill"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "culori": "^4.0.1",
+    "playwright": "^1.49.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/culori": "^2.1.1",
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
