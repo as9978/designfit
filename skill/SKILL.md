@@ -1,0 +1,67 @@
+---
+name: designfit-fidelity-loop
+description: Use when implementing a Figma design as front-end code with an MCP-connected agent — builds the UI, then validates it against the design with designfit and self-corrects until it passes. Triggers on "implement this Figma frame", "make it match the design", "pixel-perfect from Figma".
+---
+
+# designfit — Design-Fidelity Loop
+
+Implement a Figma screen as code, then **prove** it matches by validating with the `designfit_validate` MCP tool and fixing what it reports. Repeat until `pass: true`.
+
+## Prerequisites
+
+- The `designfit` MCP server is connected (exposes `designfit_validate`).
+- Figma's MCP server is connected (`get_metadata`, `get_variable_defs`, `get_screenshot`).
+- A dev server is running and the target screen is reachable at a URL.
+
+## The loop
+
+### 1. Read the design from Figma
+
+- `get_metadata` on the target frame → node tree with ids, names, and frames (`x`, `y`, `width`, `height`).
+- `get_variable_defs` → resolved token values and their variable names.
+
+### 2. Build the UI, tagging as you go
+
+For every Figma node you implement as a distinct element, add `data-designfit-id="<figmaNodeId>"` to that element. The screen's root container gets the **root** node id. You know the mapping because you are the one building it — record it.
+
+### 3. Assemble the `DesignSpec`
+
+Transform the Figma data into designfit's shape (one `root` node, nested `children`). For each node:
+
+- `id` — the Figma node id (same value you used for `data-designfit-id`).
+- `name` — the Figma layer name (e.g. `"Button/Primary"`).
+- `frame` — `{ x, y, w, h }` from `get_metadata` (rename `width`→`w`, `height`→`h`).
+- `tokens` — only the properties the design actually specifies. Colors as hex (`fill`, `color`, `borderColor`); numbers in px (`fontSize`, `lineHeight`, `letterSpacing`, `borderRadius`, `borderWidth`); `fontWeight` numeric; `fontFamily` the family name; `opacity` 0..1.
+- `tokenSources` — map each token property to its Figma variable name (e.g. `{ "fill": "color/primary" }`) so fix hints are semantic.
+- `children` — nested design nodes.
+
+### 4. Validate
+
+Call `designfit_validate` with:
+
+```json
+{
+  "url": "<running screen URL>",
+  "viewport": { "width": <frame width>, "height": <frame height> },
+  "design": { "root": { /* DesignSpec */ } },
+  "componentMap": [{ "figmaNodeId": "root" }, { "figmaNodeId": "btn" }, ...]
+}
+```
+
+Set `viewport` to the Figma frame's intended size. List every tagged node in `componentMap`.
+
+### 5. Fix and repeat
+
+Read `violations`. Each has a `component`, `check` (`token` | `geometry` | `presence`), `property`, `expected` (with the token `source` when known), `actual`, `delta`, and a `fixHint`. Apply the fixes:
+
+- **token** → use the named token / set the property to `expected`.
+- **geometry** → adjust size or position; `x`/`y` are *relative to the screen root*.
+- **presence** `exists` → render the missing element (and tag it); `unexpected` → remove the stray `data-designfit-id` or add it to the map.
+
+Re-run `designfit_validate`. **Stop when `pass` is `true`.** If the `score` does not improve across two consecutive runs, stop and report the remaining violations rather than thrashing — designfit is deterministic, so an unchanged score means your last edit had no effect on what it measures.
+
+## Notes
+
+- v1 validates **one viewport**. Validate the breakpoint the frame was designed at.
+- Geometry is compared relative to the root, so a correctly-built screen that's merely centered or offset still passes.
+- Tolerances default to ±2px geometry and ΔE ≤ 2 color. Pass `tolerances` to loosen/tighten per project.
