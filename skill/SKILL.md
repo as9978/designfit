@@ -32,7 +32,7 @@ Transform the Figma data into designfit's shape (one `root` node, nested `childr
 - `name` — the Figma layer name (e.g. `"Button/Primary"`).
 - `frame` — `{ x, y, w, h }` from `get_metadata` (rename `width`→`w`, `height`→`h`).
 - `tokens` — only the properties the design actually specifies. Colors as hex (`fill`, `color`, `borderColor`); numbers in px (`fontSize`, `lineHeight`, `letterSpacing`, `borderRadius`, `borderWidth`); `fontWeight` numeric; `fontFamily` the family name; `opacity` 0..1.
-- `tokenSources` — map each token property to its Figma variable name (e.g. `{ "fill": "color/primary" }`) so fix hints are semantic.
+- `tokenSources` — map each token property to its Figma variable name (e.g. `{ "fill": "color/primary" }`). This makes fix hints semantic **and** marks the property as enforced: token-bound properties are hard `error`s on mismatch, while properties absent from `tokenSources` are treated as hardcoded literals and downgraded to advisory `warn`s.
 - `children` — nested design nodes.
 
 ### 4. Validate
@@ -62,7 +62,7 @@ Re-run `designfit_validate`. **Stop when `pass` is `true`.** If the `score` does
 
 ## Notes
 
-- **Every token you declare is enforced as a hard requirement** — a mismatch is an `error` that fails the run and lowers the score. Declare only the values you want designfit to enforce; omit intentionally-hardcoded or purely-decorative values rather than letting them gate fidelity. (`tokenSources` only enriches fix hints; it does not change severity.)
+- **Token enforcement follows `tokenSources`:** a property bound to a Figma variable (listed in `tokenSources`) is enforced as an `error` — a mismatch fails the run and lowers the score. A hardcoded value with **no** `tokenSources` entry is advisory: a mismatch is a `warn` that surfaces in the fix-list but does **not** fail `pass` or lower the score. So bind a value to its token when you want designfit to enforce it; leave it hardcoded when it's informational.
 - v1 validates **one viewport**. Validate the breakpoint the frame was designed at.
 - Geometry is compared relative to the root, so a correctly-built screen that's merely centered or offset still passes.
 - Tolerances default to ±2px geometry and ΔE ≤ 2 color. Pass `tolerances` to loosen/tighten per project.
