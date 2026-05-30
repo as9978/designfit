@@ -1,6 +1,6 @@
 // src/normalize.ts
 import type { RawComputed, ResolvedStyles } from "./types";
-import { toHex, isTransparent } from "./color";
+import { normalizeColor } from "./color";
 
 /** Parse a CSS length like "16px" to a number, or undefined if not numeric (e.g. "normal"). */
 export function parsePx(value: string): number | undefined {
@@ -15,8 +15,7 @@ export function normalizeFamily(value: string): string {
 }
 
 function colorOrUndefined(value: string): string | undefined {
-  if (isTransparent(value)) return undefined;
-  return toHex(value) ?? undefined;
+  return normalizeColor(value);
 }
 
 export function normalizeStyles(raw: RawComputed): ResolvedStyles {

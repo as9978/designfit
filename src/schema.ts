@@ -2,6 +2,12 @@
 import { z } from "zod";
 import type { DesignNode, Tolerances } from "./types";
 import { DEFAULT_TOLERANCES } from "./defaults";
+import { toHex } from "./color";
+
+/** A CSS color string that must be parseable — malformed design colors are rejected at the boundary. */
+const colorString = z.string().refine((s) => toHex(s) !== null, {
+  message: "must be a parseable CSS color (hex / rgb / named)",
+});
 
 const FrameSchema = z.object({
   x: z.number(),
@@ -12,15 +18,15 @@ const FrameSchema = z.object({
 
 const TokensSchema = z
   .object({
-    fill: z.string(),
-    color: z.string(),
+    fill: colorString,
+    color: colorString,
     fontFamily: z.string(),
     fontSize: z.number(),
     fontWeight: z.number(),
     lineHeight: z.number(),
     letterSpacing: z.number(),
     borderRadius: z.number(),
-    borderColor: z.string(),
+    borderColor: colorString,
     borderWidth: z.number(),
     opacity: z.number(),
   })
