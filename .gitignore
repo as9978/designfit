@@ -7,3 +7,6 @@ coverage/
 .DS_Store
 playwright-report/
 test-results/
+
+# Local, machine-specific MCP client registration
+.mcp.json
