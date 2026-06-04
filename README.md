@@ -4,7 +4,7 @@
 
 `trueup` is an MCP server + Claude Code skill that checks a rendered implementation against its Figma design and hands the coding agent a machine-actionable fix-list. It compares **design tokens** and **geometry** (element boxes relative to the screen root) — not raw pixels — so font-rendering noise never makes the agent oscillate. Deterministic in, deterministic out.
 
-![fidelity](https://img.shields.io/badge/fidelity-100-brightgreen)
+[![CI](https://github.com/as9978/trueup/actions/workflows/ci.yml/badge.svg)](https://github.com/as9978/trueup/actions/workflows/ci.yml)
 
 ## Why geometry, not pixels
 
