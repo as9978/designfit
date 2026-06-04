@@ -10,3 +10,7 @@ test-results/
 
 # Local, machine-specific MCP client registration
 .mcp.json
+
+# Internal planning / design docs — not for the public repo
+docs/superpowers/
+docs/LAUNCH-PLAN.md
