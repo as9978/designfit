@@ -1,0 +1,42 @@
+{
+  "pass": true,
+  "score": 100,
+  "viewport": {
+    "width": 1281,
+    "height": 3291
+  },
+  "violations": [
+    {
+      "component": "Nav CTA / INIT_TEST#2001:21",
+      "check": "token",
+      "property": "fill",
+      "severity": "warn",
+      "expected": {
+        "value": "#ff506e"
+      },
+      "actual": {
+        "value": "#ff0055"
+      },
+      "delta": "ΔE 6.6 (#ff0055 vs #ff506e)",
+      "fixHint": "use #ff506e (#ff506e) — hardcoded value (no Figma token); bind it to a token to enforce, or omit it if intentional"
+    },
+    {
+      "component": "Nav CTA / INIT_TEST#2001:21",
+      "check": "token",
+      "property": "borderColor",
+      "severity": "warn",
+      "expected": {
+        "value": "#ff506e"
+      },
+      "actual": {
+        "value": "#ff0055"
+      },
+      "delta": "ΔE 6.6 (#ff0055 vs #ff506e)",
+      "fixHint": "use #ff506e (#ff506e) — hardcoded value (no Figma token); bind it to a token to enforce, or omit it if intentional"
+    }
+  ],
+  "unmapped": {
+    "inDesignNotFound": [],
+    "inDomNotMapped": []
+  }
+}

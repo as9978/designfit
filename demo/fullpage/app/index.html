@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>STRESS_OS v1.0</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;700&amp;family=Playfair+Display:wght@700;900&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#e8bcbe",
+                        "secondary-container": "#00fd93",
+                        "on-secondary": "#00391d",
+                        "secondary-fixed-dim": "#00e384",
+                        "secondary-fixed": "#5affa2",
+                        "surface-container": "#1f1f25",
+                        "on-secondary-container": "#00703e",
+                        "tertiary": "#d1bcff",
+                        "surface-container-high": "#2a292f",
+                        "surface-bright": "#39383e",
+                        "on-primary-container": "#5b0018",
+                        "tertiary-fixed-dim": "#d1bcff",
+                        "surface-container-low": "#1b1b20",
+                        "primary": "#ffb2b8",
+                        "inverse-primary": "#be003d",
+                        "primary-container": "#ff506e",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#3c0090",
+                        "inverse-on-surface": "#303036",
+                        "on-tertiary-fixed-variant": "#5700c9",
+                        "primary-fixed": "#ffdadb",
+                        "on-primary": "#67001d",
+                        "on-tertiary-container": "#34007f",
+                        "surface-dim": "#131318",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#40000f",
+                        "tertiary-fixed": "#e9ddff",
+                        "surface-container-highest": "#35343a",
+                        "surface-tint": "#ffb2b8",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#00210e",
+                        "on-error": "#690005",
+                        "on-background": "#e4e1e9",
+                        "surface": "#131318",
+                        "inverse-surface": "#e4e1e9",
+                        "outline-variant": "#5e3e41",
+                        "on-surface": "#e4e1e9",
+                        "surface-container-lowest": "#0e0e13",
+                        "secondary": "#e9ffeb",
+                        "outline": "#ae8789",
+                        "on-secondary-fixed-variant": "#00522c",
+                        "on-primary-fixed-variant": "#91002d",
+                        "on-tertiary-fixed": "#23005b",
+                        "primary-fixed-dim": "#ffb2b8",
+                        "surface-variant": "#35343a",
+                        "tertiary-container": "#a178ff",
+                        "background": "#131318"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "48px",
+                        "gutter": "24px",
+                        "xl": "80px",
+                        "xs": "4px",
+                        "md": "24px",
+                        "sm": "12px",
+                        "container-max": "1440px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Geist"],
+                        "code-sm": ["Space Mono"],
+                        "display-xl": ["Playfair Display"],
+                        "display-xl-mobile": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"],
+                        "label-caps": ["Space Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "code-sm": ["14px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+                        "display-xl": ["80px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900" }],
+                        "display-xl-mobile": ["48px", { "lineHeight": "1.1", "fontWeight": "900" }],
+                        "headline-lg": ["48px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "1.0", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(19, 19, 24, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(255, 178, 184, 0.5);
+        }
+        .neon-border {
+            box-shadow: 0 0 5px #ff0055, inset 0 0 5px #ff0055;
+            border-color: #ff0055;
+        }
+        .neon-text {
+            text-shadow: 0 0 5px #ff0055;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 0, 85, 0.3);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 0, 85, 0.6);
+        }
+    </style>
+</head>
+<body data-designfit-id="2001:2" class="bg-background text-on-background font-body-md min-h-screen pt-xl relative overflow-x-hidden custom-scrollbar">
+<!-- Ambient Background Effect -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-20">
+<div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary-container filter blur-[100px]"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-tertiary-container filter blur-[120px]"></div>
+</div>
+<!-- TopNavBar -->
+<nav data-designfit-id="2001:6" class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b-2 border-outline-variant shadow-[0_8px_32px_rgba(112,0,255,0.2)] flex justify-between items-center px-gutter h-xl max-w-container-max mx-auto left-0 right-0">
+<div class="font-display-xl-mobile md:font-display-xl text-headline-lg font-black tracking-tighter text-primary">
+            STRESS_OS
+        </div>
+<ul class="hidden md:flex gap-gutter items-center">
+<li><a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary-fixed hover:bg-surface-container-high transition-colors p-sm rounded active:scale-95" href="#">Components</a></li>
+<li><a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary-fixed hover:bg-surface-container-high transition-colors p-sm rounded active:scale-95" href="#">Telemetry</a></li>
+<li><a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary-fixed hover:bg-surface-container-high transition-colors p-sm rounded active:scale-95" href="#">Logs</a></li>
+<li><a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary-fixed hover:bg-surface-container-high transition-colors p-sm rounded active:scale-95" href="#">Docs</a></li>
+<li><a class="font-label-caps text-label-caps text-secondary-fixed font-bold border-b-2 border-secondary-fixed pb-1" href="#">Pricing</a></li>
+</ul>
+<button data-designfit-id="2001:21" class="bg-[#FF0055] text-white font-label-caps text-label-caps px-md py-sm rounded-none border border-[#FF0055] hover:bg-transparent hover:text-[#FF0055] transition-colors active:scale-95">INIT_TEST</button>
+</nav>
+<!-- Main Content -->
+<main class="max-w-container-max mx-auto px-gutter py-xl flex flex-col gap-xl relative z-10">
+<!-- Component Library Showcase Header -->
+<section class="glass-panel p-xl flex flex-col items-start gap-md border-b-4 border-[#FF0055] relative overflow-hidden mt-8">
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-30 bg-gradient-to-l from-[#FF0055]/20 to-transparent pointer-events-none"></div>
+<h1 data-designfit-id="2001:27" class="font-display-xl-mobile md:font-display-xl text-primary text-glow leading-tight max-w-3xl relative z-10">Component Matrix</h1>
+<h2 data-designfit-id="2001:29" class="font-code-sm text-code-sm text-on-surface-variant max-w-2xl relative z-10">&gt; SHADCN-INSPIRED UI ELEMENTS. HIGH-CONTRAST NEON AESTHETIC. KINETIC ENTROPY SYSTEM ACTIVE.</h2>
+</section>
+<!-- Components Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-xl">
+<!-- Form Elements -->
+<section class="flex flex-col gap-md">
+<div class="flex items-center gap-sm border-b border-surface-bright pb-sm">
+<span class="material-symbols-outlined text-[#FF0055]">input</span>
+<h2 class="font-headline-lg text-2xl text-on-surface">Form Elements</h2>
+</div>
+<div data-designfit-id="2001:37" class="glass-panel p-lg rounded-lg border border-surface-bright flex flex-col gap-lg">
+<!-- Inputs -->
+<div class="flex flex-col gap-sm">
+<label class="font-code-sm text-code-sm text-on-surface-variant">Default Input</label>
+<input class="bg-surface-container-lowest border border-outline-variant rounded p-sm text-on-surface font-code-sm focus:outline-none focus:border-[#FF0055] focus:ring-1 focus:ring-[#FF0055] transition-all" placeholder="Enter string..." type="text"/>
+</div>
+<div class="flex flex-col gap-sm">
+<label class="font-code-sm text-code-sm text-on-surface-variant">Neon Input (Error)</label>
+<input class="bg-surface-container-lowest neon-border rounded-full p-sm text-[#FF0055] font-code-sm focus:outline-none transition-all" type="text" value="INVALID_SYNTAX"/>
+</div>
+<!-- Checkbox & Radio -->
+<div class="grid grid-cols-2 gap-md mt-sm">
+<div class="flex flex-col gap-sm">
+<label class="flex items-center gap-sm cursor-pointer group">
+<div class="w-5 h-5 border-2 border-outline-variant rounded group-hover:border-[#FF0055] transition-colors relative flex items-center justify-center bg-surface-container-lowest">
+<div class="w-3 h-3 bg-[#FF0055] rounded-sm opacity-0 group-active:opacity-100 transition-opacity"></div>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface">Enable Override</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer group">
+<div class="w-5 h-5 border-2 border-[#FF0055] rounded relative flex items-center justify-center bg-surface-container-lowest">
+<div class="w-3 h-3 bg-[#FF0055] rounded-sm"></div>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface">Force Reboot</span>
+</label>
+</div>
+<div class="flex flex-col gap-sm">
+<label class="flex items-center gap-sm cursor-pointer group">
+<div class="w-5 h-5 border-2 border-secondary-fixed rounded-full relative flex items-center justify-center bg-surface-container-lowest">
+<div class="w-2.5 h-2.5 bg-secondary-fixed rounded-full"></div>
+</div>
+<span class="font-code-sm text-code-sm text-on-surface">Protocol Alpha</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer group">
+<div class="w-5 h-5 border-2 border-outline-variant rounded-full group-hover:border-secondary-fixed transition-colors relative flex items-center justify-center bg-surface-container-lowest">
+</div>
+<span class="font-code-sm text-code-sm text-on-surface">Protocol Beta</span>
+</label>
+</div>
+</div>
+<!-- Slider -->
+<div class="flex flex-col gap-sm mt-sm">
+<div class="flex justify-between items-center">
+<label class="font-code-sm text-code-sm text-on-surface-variant">Entropy Level</label>
+<span class="font-code-sm text-code-sm text-[#FF0055]">88%</span>
+</div>
+<div class="relative w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-[#FF0055] w-[88%] shadow-[0_0_10px_#ff0055]"></div>
+</div>
+<div class="relative w-full h-4 mt-2 cursor-pointer group">
+<div class="absolute top-1/2 left-[88%] transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-[#FF0055] rounded-full group-hover:scale-125 transition-transform"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Feedback Elements -->
+<section class="flex flex-col gap-md">
+<div class="flex items-center gap-sm border-b border-surface-bright pb-sm">
+<span class="material-symbols-outlined text-secondary-fixed">notifications</span>
+<h2 class="font-headline-lg text-2xl text-on-surface">Feedback</h2>
+</div>
+<div data-designfit-id="2001:91" class="glass-panel p-lg rounded-xl border border-surface-bright flex flex-col gap-lg bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-surface-container to-background">
+<!-- Toast / Alert -->
+<div data-designfit-id="2001:92" class="bg-surface border border-outline-variant p-md rounded-md flex gap-md items-start shadow-lg">
+<span class="material-symbols-outlined text-secondary-fixed mt-1">info</span>
+<div class="flex flex-col gap-1">
+<h4 data-designfit-id="2001:98" class="font-code-sm font-bold text-on-surface">System Update Complete</h4>
+<p data-designfit-id="2001:100" class="font-body-md text-sm text-on-surface-variant">Core modules have been successfully synchronized across all nodes.</p>
+</div>
+<button data-designfit-id="2001:101" class="ml-auto text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-sm">close</span></button>
+</div>
+<div class="bg-[#FF0055]/10 border border-[#FF0055] p-md rounded-none flex gap-md items-start shadow-[0_0_15px_rgba(255,0,85,0.2)]">
+<span class="material-symbols-outlined text-[#FF0055] mt-1 animate-pulse">warning</span>
+<div class="flex flex-col gap-1">
+<h4 class="font-code-sm font-bold text-[#FF0055] neon-text">CRITICAL_OVERLOAD</h4>
+<p class="font-code-sm text-sm text-[#FF0055]/80">Sector 7 thermal limits exceeded. Manual intervention required immediately.</p>
+</div>
+</div>
+<!-- Progress Bars -->
+<div class="flex flex-col gap-md mt-sm">
+<div class="flex flex-col gap-2">
+<div class="flex justify-between text-xs font-code-sm">
+<span class="text-on-surface-variant">Data Migration</span>
+<span class="text-secondary-fixed">45%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed w-[45%] rounded-full"></div>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between text-xs font-code-sm">
+<span class="text-on-surface-variant">Purging Cache</span>
+<span class="text-[#00F0FF]">Processing...</span>
+</div>
+<div class="w-full h-1 bg-surface-container-lowest rounded-none overflow-hidden relative">
+<div class="absolute h-full bg-[#00F0FF] w-1/3 animate-[slide_1.5s_ease-in-out_infinite] shadow-[0_0_8px_#00F0FF]"></div>
+</div>
+</div>
+</div>
+<style>
+                @keyframes slide {
+                    0% { left: -33%; }
+                    100% { left: 100%; }
+                }
+            </style>
+</div>
+</section>
+<!-- Navigation Elements -->
+<section class="flex flex-col gap-md">
+<div class="flex items-center gap-sm border-b border-surface-bright pb-sm">
+<span class="material-symbols-outlined text-tertiary">route</span>
+<h2 class="font-headline-lg text-2xl text-on-surface">Navigation</h2>
+</div>
+<div data-designfit-id="2001:136" class="glass-panel p-lg rounded-DEFAULT border border-surface-bright flex flex-col gap-xl">
+<!-- Breadcrumbs -->
+<nav class="flex items-center gap-2 font-code-sm text-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Root</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Sectors</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-[#FF0055] font-bold">Sector_7</span>
+</nav>
+<!-- Tabs -->
+<div class="flex flex-col gap-md border-b border-outline-variant pb-md">
+<div class="flex bg-surface-container-low p-1 rounded-md inline-flex w-fit">
+<button class="px-md py-sm bg-surface rounded shadow text-on-surface font-code-sm text-sm">Overview</button>
+<button class="px-md py-sm text-on-surface-variant hover:text-on-surface font-code-sm text-sm transition-colors">Metrics</button>
+<button class="px-md py-sm text-on-surface-variant hover:text-on-surface font-code-sm text-sm transition-colors">Settings</button>
+</div>
+<div class="flex gap-4 border-b border-surface-bright mt-4">
+<button class="pb-2 px-2 border-b-2 border-[#FF0055] text-[#FF0055] font-label-caps uppercase text-xs tracking-wider">Active</button>
+<button class="pb-2 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-label-caps uppercase text-xs tracking-wider transition-colors">Archived</button>
+<button class="pb-2 px-2 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-label-caps uppercase text-xs tracking-wider transition-colors">Deleted</button>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-center gap-2 mt-auto pt-4">
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant rounded hover:bg-surface-container-high transition-colors text-on-surface-variant"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="w-8 h-8 flex items-center justify-center border border-[#FF0055] bg-[#FF0055]/10 text-[#FF0055] rounded font-code-sm text-sm">1</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant rounded hover:bg-surface-container-high transition-colors text-on-surface-variant font-code-sm text-sm">2</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant rounded hover:bg-surface-container-high transition-colors text-on-surface-variant font-code-sm text-sm">3</button>
+<span class="text-on-surface-variant">...</span>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant rounded hover:bg-surface-container-high transition-colors text-on-surface-variant"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</section>
+<!-- Overlays & Dialogs -->
+<section class="flex flex-col gap-md">
+<div class="flex items-center gap-sm border-b border-surface-bright pb-sm">
+<span class="material-symbols-outlined text-[#00F0FF]">layers</span>
+<h2 class="font-headline-lg text-2xl text-on-surface">Overlays</h2>
+</div>
+<div data-designfit-id="2001:186" class="glass-panel p-lg rounded-lg border border-surface-bright flex flex-col items-center justify-center gap-xl bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')]">
+<div class="flex flex-wrap gap-md justify-center">
+<!-- Modal Trigger -->
+<div class="relative group cursor-pointer">
+<button class="bg-surface-container border-2 border-dashed border-tertiary text-tertiary px-lg py-sm font-code-sm text-sm hover:bg-tertiary hover:text-background transition-all">Open Terminal Modal</button>
+<!-- Faux Modal Preview (Hover) -->
+<div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-4 w-64 bg-surface border border-outline shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 flex flex-col">
+<div class="bg-surface-container-high p-2 flex justify-between items-center border-b border-outline">
+<span class="font-code-sm text-xs text-on-surface">terminal.exe</span>
+<span class="material-symbols-outlined text-xs text-on-surface-variant">close</span>
+</div>
+<div class="p-4 font-code-sm text-xs text-[#00F0FF] bg-[#050505]">
+                            &gt; _<br/>
+                            &gt; await connection...<br/>
+                            &gt; OK.
+                        </div>
+</div>
+</div>
+<!-- Popover Trigger -->
+<div class="relative group cursor-pointer">
+<button class="bg-[#1A0033] border border-[#00F0FF] text-[#00F0FF] px-md py-sm rounded-full font-code-sm text-sm hover:shadow-[0_0_15px_#00F0FF] transition-all flex items-center gap-2">
+                        Options <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<!-- Faux Popover (Hover) -->
+<div class="absolute top-full left-0 mt-2 w-48 bg-surface-container border border-surface-bright rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 flex flex-col p-1">
+<div class="p-2 hover:bg-surface-container-high rounded text-sm font-code-sm text-on-surface">Edit Config</div>
+<div class="p-2 hover:bg-surface-container-high rounded text-sm font-code-sm text-on-surface">Duplicate Node</div>
+<div class="border-t border-surface-bright my-1"></div>
+<div class="p-2 hover:bg-error/20 rounded text-sm font-code-sm text-[#FF0055]">Terminate Process</div>
+</div>
+</div>
+</div>
+<!-- Faux Tooltip -->
+<div class="flex items-center gap-2 text-on-surface-variant font-code-sm text-sm mt-8">
+                Hover over icon
+                <div class="relative group inline-block">
+<span class="material-symbols-outlined cursor-help text-secondary-fixed">help</span>
+<div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-inverse-surface text-inverse-on-surface text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        Initiates diagnostic sequence
+                    </div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Telemetry Dashboard -->
+<section class="mt-xl flex flex-col gap-md">
+<div data-designfit-id="2001:226" class="flex items-center gap-sm border-b border-[#00F0FF] pb-sm">
+<span class="material-symbols-outlined text-[#00F0FF]">query_stats</span>
+<h2 class="font-display-xl-mobile md:font-headline-lg text-3xl text-on-surface">Telemetry Dashboard</h2>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+<!-- Main Chart Area -->
+<div data-designfit-id="2001:233" class="lg:col-span-2 glass-panel p-md border border-surface-bright flex flex-col gap-md h-96 relative overflow-hidden">
+<div class="flex justify-between items-center">
+<h3 class="font-code-sm text-[#00F0FF]">NETWORK_THROUGHPUT</h3>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-surface-container text-xs font-code-sm border border-outline">1H</span>
+<span class="px-2 py-1 bg-[#00F0FF]/20 text-[#00F0FF] text-xs font-code-sm border border-[#00F0FF]">24H</span>
+<span class="px-2 py-1 bg-surface-container text-xs font-code-sm border border-outline">7D</span>
+</div>
+</div>
+<!-- CSS based faux chart -->
+<div class="flex-1 border-l border-b border-outline-variant relative mt-4 flex items-end gap-1 px-2 pt-8">
+<!-- Y axis labels -->
+<div class="absolute left-[-30px] bottom-0 text-[10px] font-code-sm text-on-surface-variant">0</div>
+<div class="absolute left-[-30px] bottom-1/2 text-[10px] font-code-sm text-on-surface-variant">50k</div>
+<div class="absolute left-[-30px] top-0 text-[10px] font-code-sm text-on-surface-variant">100k</div>
+<!-- Grid lines -->
+<div class="absolute w-full h-[1px] bg-outline-variant/30 bottom-1/2 left-0"></div>
+<div class="absolute w-full h-[1px] bg-outline-variant/30 top-0 left-0"></div>
+<!-- Bars -->
+<div class="w-full bg-secondary-fixed/50 hover:bg-secondary-fixed transition-colors h-[20%] relative group"><div class="hidden group-hover:block absolute top-[-25px] left-1/2 -translate-x-1/2 bg-surface p-1 text-[10px] border border-secondary-fixed rounded text-secondary-fixed z-10">20k</div></div>
+<div class="w-full bg-[#00F0FF]/50 hover:bg-[#00F0FF] transition-colors h-[45%] relative group"><div class="hidden group-hover:block absolute top-[-25px] left-1/2 -translate-x-1/2 bg-surface p-1 text-[10px] border border-[#00F0FF] rounded text-[#00F0FF] z-10">45k</div></div>
+<div class="w-full bg-[#FF0055]/50 hover:bg-[#FF0055] transition-colors h-[80%] relative group"><div class="hidden group-hover:block absolute top-[-25px] left-1/2 -translate-x-1/2 bg-surface p-1 text-[10px] border border-[#FF0055] rounded text-[#FF0055] z-10">80k</div></div>
+<div class="w-full bg-[#00F0FF]/50 hover:bg-[#00F0FF] transition-colors h-[60%] relative group"></div>
+<div class="w-full bg-[#00F0FF]/50 hover:bg-[#00F0FF] transition-colors h-[30%] relative group"></div>
+<div class="w-full bg-secondary-fixed/50 hover:bg-secondary-fixed transition-colors h-[15%] relative group"></div>
+<div class="w-full bg-[#FF0055]/50 hover:bg-[#FF0055] transition-colors h-[95%] relative group"><div class="hidden group-hover:block absolute top-[-25px] left-1/2 -translate-x-1/2 bg-surface p-1 text-[10px] border border-[#FF0055] rounded text-[#FF0055] z-10">95k</div></div>
+<div class="w-full bg-[#00F0FF]/50 hover:bg-[#00F0FF] transition-colors h-[50%] relative group"></div>
+<div class="w-full bg-secondary-fixed/50 hover:bg-secondary-fixed transition-colors h-[25%] relative group"></div>
+<div class="w-full bg-[#00F0FF]/50 hover:bg-[#00F0FF] transition-colors h-[40%] relative group"></div>
+<div class="w-full bg-[#FF0055]/50 hover:bg-[#FF0055] transition-colors h-[70%] relative group"></div>
+<div class="w-full bg-secondary-fixed/50 hover:bg-secondary-fixed transition-colors h-[35%] relative group"></div>
+<div class="w-full bg-[#00F0FF]/50 hover:bg-[#00F0FF] transition-colors h-[55%] relative group"></div>
+<div class="w-full bg-[#00F0FF]/50 hover:bg-[#00F0FF] transition-colors h-[45%] relative group"></div>
+<div class="w-full bg-secondary-fixed/50 hover:bg-secondary-fixed transition-colors h-[20%] relative group"></div>
+</div>
+</div>
+<!-- Stats Sidebar -->
+<div class="flex flex-col gap-md">
+<div data-designfit-id="2001:269" class="glass-panel p-md border-l-4 border-secondary-fixed flex justify-between items-center h-full">
+<div class="flex flex-col gap-1">
+<span class="font-code-sm text-on-surface-variant text-xs">ACTIVE_NODES</span>
+<span class="font-display-xl-mobile text-secondary-fixed text-4xl">4,092</span>
+</div>
+<span class="material-symbols-outlined text-4xl text-secondary-fixed/30">dns</span>
+</div>
+<div data-designfit-id="2001:277" class="glass-panel p-md border-l-4 border-[#FF0055] flex justify-between items-center h-full">
+<div class="flex flex-col gap-1">
+<span class="font-code-sm text-on-surface-variant text-xs">ERROR_RATE</span>
+<span class="font-display-xl-mobile text-[#FF0055] text-4xl">12.4%</span>
+</div>
+<div class="flex items-center text-[#FF0055] font-code-sm text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span> +2.1%
+                </div>
+</div>
+<div data-designfit-id="2001:287" class="glass-panel p-md border border-surface-bright flex flex-col gap-2 h-full">
+<span class="font-code-sm text-on-surface-variant text-xs">SYSTEM_LOAD_DISTRIBUTION</span>
+<div class="flex-1 flex items-center justify-center relative">
+<!-- Faux Donut Chart -->
+<div class="w-24 h-24 rounded-full border-[12px] border-surface-container relative" style="border-top-color: #ff0055; border-right-color: #00f0ff; border-bottom-color: #00f0ff; border-left-color: #5affa2;">
+<div class="absolute inset-0 flex items-center justify-center font-code-sm text-xs">100%</div>
+</div>
+</div>
+<div class="flex justify-between text-[10px] font-code-sm mt-2">
+<span class="flex items-center gap-1"><div class="w-2 h-2 bg-[#FF0055]"></div>CPU</span>
+<span class="flex items-center gap-1"><div class="w-2 h-2 bg-[#00F0FF]"></div>MEM</span>
+<span class="flex items-center gap-1"><div class="w-2 h-2 bg-secondary-fixed"></div>I/O</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Complex Data Table (Preserved from original) -->
+<section data-designfit-id="2001:312" class="glass-panel p-md border-b-4 border-tertiary-container overflow-x-auto mt-xl">
+<div class="flex justify-between items-end mb-md">
+<h2 class="font-headline-lg text-tertiary-fixed-dim">ACTIVE_SESSIONS</h2>
+<span class="font-code-sm text-code-sm text-on-surface-variant">REFRESH_RATE: 100ms</span>
+</div>
+<table class="w-full text-left font-code-sm text-code-sm border-collapse">
+<thead>
+<tr data-designfit-id="2001:313" class="border-b-2 border-surface-bright text-on-surface">
+<th class="p-sm">AGENT_ID</th>
+<th class="p-sm">STATUS</th>
+<th class="p-sm">UPTIME</th>
+<th class="p-sm">LOAD</th>
+<th class="p-sm text-right">ACTIONS</th>
+</tr>
+</thead>
+<tbody class="text-on-surface-variant">
+<tr class="border-b border-surface-bright hover:bg-surface-container-high transition-colors">
+<td class="p-sm text-primary">AX-992.1</td>
+<td class="p-sm"><span class="px-2 py-1 bg-secondary-fixed/20 text-secondary-fixed rounded text-xs border border-secondary-fixed">STABLE</span></td>
+<td class="p-sm">14h 22m</td>
+<td class="p-sm">
+<div class="w-full bg-surface-container-lowest h-2 rounded-full overflow-hidden border border-outline-variant">
+<div class="bg-secondary-fixed h-full w-[45%]"></div>
+</div>
+</td>
+<td class="p-sm text-right relative">
+<button class="text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+<tr class="border-b border-surface-bright hover:bg-surface-container-high transition-colors">
+<td class="p-sm text-primary">VX-004.8</td>
+<td class="p-sm"><span class="px-2 py-1 bg-[#FFB800]/20 text-[#FFB800] rounded text-xs border border-[#FFB800]">DEGRADED</span></td>
+<td class="p-sm">02h 11m</td>
+<td class="p-sm">
+<div class="w-full bg-surface-container-lowest h-2 rounded-full overflow-hidden border border-outline-variant">
+<div class="bg-[#FFB800] h-full w-[88%]"></div>
+</div>
+</td>
+<td class="p-sm text-right">
+<button class="text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+<tr class="border-b border-surface-bright hover:bg-surface-container-high transition-colors bg-[#FF0055]/10">
+<td class="p-sm text-[#FF0055]">ZK-112.0</td>
+<td class="p-sm"><span class="px-2 py-1 bg-[#FF0055]/20 text-[#FF0055] rounded-none text-xs border border-[#FF0055] animate-pulse neon-border">CRITICAL</span></td>
+<td class="p-sm">00h 45m</td>
+<td class="p-sm">
+<div class="w-full bg-surface-container-lowest h-2 rounded-none overflow-hidden border border-[#FF0055]">
+<div class="bg-[#FF0055] h-full w-[99%] shadow-[0_0_10px_#ff0055]"></div>
+</div>
+</td>
+<td class="p-sm text-right">
+<button class="text-on-surface hover:text-[#FF0055] transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</main>
+<!-- Footer -->
+<footer data-designfit-id="2001:367" class="bg-surface-container-low dark:bg-surface-container-low w-full py-xl border-t-4 border-[#FF0055] mt-xl relative">
+<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50 pointer-events-none"></div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter px-gutter max-w-container-max mx-auto relative z-10">
+<div class="md:col-span-12 flex flex-col md:flex-row justify-between items-center gap-md">
+<div class="font-display-xl-mobile md:font-display-xl text-primary-fixed-dim text-2xl font-black">
+                    © 2024 NEURAL_STRESS_WORKS. <span class="text-[#FF0055] animate-pulse">[SYSTEM_READY]</span>
+</div>
+<ul class="flex flex-wrap gap-md font-code-sm text-code-sm text-on-surface-variant">
+<li><a data-designfit-id="2001:376" class="hover:text-secondary-fixed transition-opacity hover:opacity-80" href="#">Privacy_Protocol</a></li>
+<li><a data-designfit-id="2001:378" class="hover:text-secondary-fixed transition-opacity hover:opacity-80" href="#">Terms_of_Engagement</a></li>
+<li><a data-designfit-id="2001:380" class="hover:text-secondary-fixed transition-opacity hover:opacity-80" href="#">Audit_Logs</a></li>
+<li><a data-designfit-id="2001:382" class="hover:text-secondary-fixed transition-opacity hover:opacity-80" href="#">Contact_Base</a></li>
+</ul>
+</div>
+</div>
+</footer>
+</body></html>

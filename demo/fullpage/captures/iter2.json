@@ -1,0 +1,88 @@
+{
+  "pass": false,
+  "score": 99,
+  "viewport": {
+    "width": 1281,
+    "height": 3291
+  },
+  "violations": [
+    {
+      "component": "Nav CTA / INIT_TEST#2001:21",
+      "check": "token",
+      "property": "fill",
+      "severity": "warn",
+      "expected": {
+        "value": "#ff506e"
+      },
+      "actual": {
+        "value": "#ff0055"
+      },
+      "delta": "ΔE 6.6 (#ff0055 vs #ff506e)",
+      "fixHint": "use #ff506e (#ff506e) — hardcoded value (no Figma token); bind it to a token to enforce, or omit it if intentional"
+    },
+    {
+      "component": "Nav CTA / INIT_TEST#2001:21",
+      "check": "token",
+      "property": "borderColor",
+      "severity": "warn",
+      "expected": {
+        "value": "#ff506e"
+      },
+      "actual": {
+        "value": "#ff0055"
+      },
+      "delta": "ΔE 6.6 (#ff0055 vs #ff506e)",
+      "fixHint": "use #ff506e (#ff506e) — hardcoded value (no Figma token); bind it to a token to enforce, or omit it if intentional"
+    },
+    {
+      "component": "Stat / Error Rate#2001:277",
+      "check": "token",
+      "property": "borderColor",
+      "severity": "warn",
+      "expected": {
+        "value": "#ff0055"
+      },
+      "actual": {
+        "value": "#ff3d77"
+      },
+      "delta": "ΔE 7.0 (#ff3d77 vs #ff0055)",
+      "fixHint": "use #ff0055 (#ff0055) — hardcoded value (no Figma token); bind it to a token to enforce, or omit it if intentional"
+    },
+    {
+      "component": "Table header row#2001:313",
+      "check": "token",
+      "property": "color",
+      "severity": "error",
+      "source": "color/on-surface",
+      "expected": {
+        "value": "#e4e1e9",
+        "source": "color/on-surface"
+      },
+      "actual": {
+        "value": "#e8bcbe"
+      },
+      "delta": "ΔE 15.4 (#e8bcbe vs #e4e1e9)",
+      "fixHint": "use color/on-surface (#e4e1e9)"
+    },
+    {
+      "component": "Footer link / Terms#2001:378",
+      "check": "token",
+      "property": "color",
+      "severity": "error",
+      "source": "color/on-surface-variant",
+      "expected": {
+        "value": "#e8bcbe",
+        "source": "color/on-surface-variant"
+      },
+      "actual": {
+        "value": "#e4e1e9"
+      },
+      "delta": "ΔE 15.4 (#e4e1e9 vs #e8bcbe)",
+      "fixHint": "use color/on-surface-variant (#e8bcbe)"
+    }
+  ],
+  "unmapped": {
+    "inDesignNotFound": [],
+    "inDomNotMapped": []
+  }
+}

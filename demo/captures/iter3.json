@@ -1,0 +1,13 @@
+{
+  "pass": true,
+  "score": 100,
+  "viewport": {
+    "width": 600,
+    "height": 240
+  },
+  "violations": [],
+  "unmapped": {
+    "inDesignNotFound": [],
+    "inDomNotMapped": []
+  }
+}

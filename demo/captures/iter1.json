@@ -1,0 +1,104 @@
+{
+  "pass": false,
+  "score": 82,
+  "viewport": {
+    "width": 600,
+    "height": 240
+  },
+  "violations": [
+    {
+      "component": "Toast / Alert#2001:92",
+      "check": "token",
+      "property": "fill",
+      "severity": "error",
+      "source": "color/surface",
+      "expected": {
+        "value": "#131318",
+        "source": "color/surface"
+      },
+      "actual": {
+        "value": "#202031"
+      },
+      "delta": "ΔE 8.2 (#202031 vs #131318)",
+      "fixHint": "use color/surface (#131318)"
+    },
+    {
+      "component": "Toast / Alert#2001:92",
+      "check": "token",
+      "property": "borderRadius",
+      "severity": "error",
+      "source": "radius/md",
+      "expected": {
+        "value": "6px",
+        "source": "radius/md"
+      },
+      "actual": {
+        "value": "12px"
+      },
+      "delta": "+6px (12 vs 6)",
+      "fixHint": "set borderRadius to 6px (token radius/md)"
+    },
+    {
+      "component": "Heading#2001:98",
+      "check": "token",
+      "property": "color",
+      "severity": "error",
+      "source": "color/text/primary",
+      "expected": {
+        "value": "#e4e1e9",
+        "source": "color/text/primary"
+      },
+      "actual": {
+        "value": "#ffffff"
+      },
+      "delta": "ΔE 7.5 (#ffffff vs #e4e1e9)",
+      "fixHint": "use color/text/primary (#e4e1e9)"
+    },
+    {
+      "component": "Body#2001:100",
+      "check": "token",
+      "property": "fontSize",
+      "severity": "warn",
+      "expected": {
+        "value": "14px"
+      },
+      "actual": {
+        "value": "12px"
+      },
+      "delta": "-2px (12 vs 14)",
+      "fixHint": "set fontSize to 14px — hardcoded value (no Figma token); bind it to a token to enforce, or omit it if intentional"
+    },
+    {
+      "component": "Heading#2001:98",
+      "check": "geometry",
+      "property": "x",
+      "expected": {
+        "value": "69px"
+      },
+      "actual": {
+        "value": "57px"
+      },
+      "delta": "-12px (57 vs 69)",
+      "severity": "error",
+      "fixHint": "move so relative x = 69px"
+    },
+    {
+      "component": "Body#2001:100",
+      "check": "geometry",
+      "property": "x",
+      "expected": {
+        "value": "69px"
+      },
+      "actual": {
+        "value": "57px"
+      },
+      "delta": "-12px (57 vs 69)",
+      "severity": "error",
+      "fixHint": "move so relative x = 69px"
+    }
+  ],
+  "unmapped": {
+    "inDesignNotFound": [],
+    "inDomNotMapped": []
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "viewport": { "width": 600, "height": 240 },
+  "design": {
+    "root": {
+      "id": "2001:92",
+      "name": "Toast / Alert",
+      "frame": { "x": 0, "y": 0, "w": 479, "h": 118 },
+      "tokens": { "fill": "#131318", "borderColor": "#5e3e41", "borderWidth": 1, "borderRadius": 6 },
+      "tokenSources": { "fill": "color/surface", "borderColor": "color/border", "borderRadius": "radius/md" },
+      "children": [
+        {
+          "id": "2001:94",
+          "name": "Icon",
+          "frame": { "x": 25, "y": 25, "w": 20, "h": 24 },
+          "tokens": {},
+          "children": []
+        },
+        {
+          "id": "2001:98",
+          "name": "Heading",
+          "frame": { "x": 69, "y": 25, "w": 215, "h": 24 },
+          "tokens": { "color": "#e4e1e9", "fontSize": 16, "lineHeight": 24 },
+          "tokenSources": { "color": "color/text/primary" },
+          "children": []
+        },
+        {
+          "id": "2001:100",
+          "name": "Body",
+          "frame": { "x": 69, "y": 53, "w": 329, "h": 40 },
+          "tokens": { "color": "#e8bcbe", "fontSize": 14, "lineHeight": 20 },
+          "tokenSources": { "color": "color/text/muted" },
+          "children": []
+        },
+        {
+          "id": "2001:101",
+          "name": "Close",
+          "frame": { "x": 422, "y": 25, "w": 8, "h": 12 },
+          "tokens": {},
+          "children": []
+        }
+      ]
+    }
+  },
+  "componentMap": [
+    { "figmaNodeId": "2001:92" },
+    { "figmaNodeId": "2001:94" },
+    { "figmaNodeId": "2001:98" },
+    { "figmaNodeId": "2001:100" },
+    { "figmaNodeId": "2001:101" }
+  ]
+}
