@@ -20,6 +20,7 @@ docs/LAUNCH-PLAN.md
 
 # Launch/marketing drafts — kept local, not repo content
 docs/blog/
+docs/launch/
 
 # Demo render artifacts — regenerable via demo/**/run.mjs; kept out so the repo stays lean
 demo/**/*.mp4
