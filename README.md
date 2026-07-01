@@ -35,6 +35,8 @@ The skill ships in the package at `skill/SKILL.md`. Skills aren't auto-loaded fr
 
 The one tool, `designfit_validate`, takes `{ url, viewport, design, componentMap, tolerances? }` and returns `{ pass, score, violations, unmapped }`.
 
+For a full walkthrough on a real Figma frame — the loop, a copy-paste prompt, and troubleshooting — see [docs/validating-a-figma-frame.md](docs/validating-a-figma-frame.md).
+
 ## v1 scope
 
 One viewport. Token + geometry + presence checks. Responsive multi-breakpoint and a perceptual VLM fallback are on the roadmap, not in v1.

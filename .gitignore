@@ -22,6 +22,5 @@ docs/LAUNCH-PLAN.md
 docs/blog/
 docs/launch/
 
-# Demo render artifacts — regenerable via demo/**/run.mjs; kept out so the repo stays lean
-demo/**/*.mp4
-demo/**/*.png
+# Local demo scaffolding — used to generate assets/hero.png + the release video; not public repo content
+demo/
