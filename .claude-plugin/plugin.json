@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "designfit",
+  "version": "0.1.0",
+  "description": "Validate AI-built front-ends against their Figma design — deterministic token + geometry conformance, not pixels.",
+  "author": {
+    "name": "Ali Seifaldini",
+    "url": "https://github.com/as9978"
+  },
+  "homepage": "https://github.com/as9978/designfit#readme",
+  "repository": "https://github.com/as9978/designfit",
+  "license": "MIT",
+  "keywords": [
+    "figma",
+    "design-tokens",
+    "design-system",
+    "mcp",
+    "frontend",
+    "visual-regression"
+  ],
+  "skills": ["./skill/"],
+  "mcpServers": {
+    "designfit": {
+      "command": "npx",
+      "args": ["-y", "designfit@0.1"]
+    }
+  }
+}
