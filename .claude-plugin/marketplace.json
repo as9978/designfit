@@ -1,0 +1,15 @@
+{
+  "name": "designfit",
+  "description": "The designfit plugin: deterministic Figma design-fidelity validation for AI-built front-ends.",
+  "owner": {
+    "name": "Ali Seifaldini",
+    "url": "https://github.com/as9978"
+  },
+  "plugins": [
+    {
+      "name": "designfit",
+      "source": "./",
+      "description": "Validate AI-built front-ends against their Figma design — deterministic token + geometry conformance, not pixels. MCP server + fidelity-loop skill."
+    }
+  ]
+}

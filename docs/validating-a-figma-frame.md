@@ -4,10 +4,10 @@ designfit works as a loop: your coding agent builds a frame, tags what it built,
 
 ## Prerequisites
 
-- **designfit installed and registered** as an MCP server in your client. Global install: `npm i -g designfit`, then `{ "mcpServers": { "designfit": { "command": "designfit" } } }`. (Or from a clone: `npm run build`, then point the client at `node dist/index.js`.) Run `npx playwright install chromium` once.
+- **designfit installed.** In Claude Code, install the plugin and you're done: `/plugin marketplace add as9978/designfit`, then `/plugin install designfit@designfit` registers the MCP server and the skill together. For any other MCP client: `npm i -g designfit`, then `{ "mcpServers": { "designfit": { "command": "designfit" } } }`. (Or from a clone: `npm run build`, then point the client at `node dist/index.js`.) Either way, run `npx playwright install chromium` once.
 - **Figma's MCP connected** in the same session, so the agent can read the frame's tokens and geometry.
 - **A dev server running** for the app you're implementing into — note its URL.
-- **The skill discoverable**: copy `skill/SKILL.md` to `.claude/skills/designfit-fidelity-loop/SKILL.md` (skills aren't auto-loaded from an npm dependency).
+- **The skill discoverable.** The plugin registers it for you. On a manual install, copy `skill/SKILL.md` to `.claude/skills/designfit-fidelity-loop/SKILL.md` (skills aren't auto-loaded from an npm dependency).
 - **A Figma frame picked.** Start simple — a card or a button row.
 
 ## The loop
