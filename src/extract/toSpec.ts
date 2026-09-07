@@ -1,6 +1,6 @@
 // src/extract/toSpec.ts
-import type { DesignTokens, TokenProperty } from "../types";
-import type { FigmaNode, FigmaPaint, FigmaStyleMeta } from "./figmaTypes";
+import type { DesignNode, DesignTokens, MapEntry, TokenProperty, Viewport } from "../types";
+import type { FigmaNode, FigmaNodesResponse, FigmaPaint, FigmaStyleMeta } from "./figmaTypes";
 
 const to255 = (c: number) => Math.round(Math.min(1, Math.max(0, c)) * 255).toString(16).padStart(2, "0");
 
@@ -102,4 +102,76 @@ export function nodeTokenSources(
 
   for (const p of Object.keys(out) as TokenProperty[]) if (tokens[p] === undefined) delete out[p];
   return Object.keys(out).length ? out : undefined;
+}
+
+export interface ExtractResult {
+  design: { root: DesignNode };
+  componentMap: MapEntry[];
+  viewport: Viewport;
+}
+
+export interface ToSpecOptions {
+  /** Levels below the root to emit. undefined = unlimited, 0 = root only. */
+  maxDepth?: number;
+  /** VariableID -> variable name (from /variables/local). Unresolved ids stay raw. */
+  variableNames?: Record<string, string>;
+}
+
+/** When ALL of a node's children have one of these types, the node is an icon: emit it, don't descend. */
+const VECTOR_TYPES = new Set(["VECTOR", "BOOLEAN_OPERATION", "LINE", "STAR", "REGULAR_POLYGON"]);
+
+function isIconLeaf(node: FigmaNode): boolean {
+  return !!node.children && node.children.length > 0 && node.children.every((c) => VECTOR_TYPES.has(c.type));
+}
+
+function walk(
+  node: FigmaNode,
+  depth: number,
+  opts: ToSpecOptions,
+  styles: Record<string, FigmaStyleMeta>,
+  map: MapEntry[],
+): DesignNode | undefined {
+  if (node.visible === false || !node.absoluteBoundingBox) return undefined;
+  const b = node.absoluteBoundingBox;
+  const tokens = nodeTokens(node);
+  const tokenSources = nodeTokenSources(node, tokens, styles, opts.variableNames ?? {});
+  map.push({ figmaNodeId: node.id });
+
+  const descend = !isIconLeaf(node) && (opts.maxDepth === undefined || depth < opts.maxDepth);
+  const children: DesignNode[] = [];
+  if (descend) {
+    for (const c of node.children ?? []) {
+      const d = walk(c, depth + 1, opts, styles, map);
+      if (d) children.push(d);
+    }
+  }
+  return {
+    id: node.id,
+    name: node.name,
+    frame: { x: b.x, y: b.y, w: b.width, h: b.height },
+    tokens,
+    ...(tokenSources ? { tokenSources } : {}),
+    children,
+  };
+}
+
+/**
+ * Turn a Figma REST /nodes response into a ready designfit_validate input (minus `url`).
+ * Deterministic: no network, no heuristics beyond the documented filter rules.
+ */
+export function toSpec(response: FigmaNodesResponse, nodeId: string | undefined, opts: ToSpecOptions = {}): ExtractResult {
+  const ids = Object.keys(response.nodes ?? {});
+  const key = nodeId ?? ids[0];
+  const entry = key ? response.nodes[key] : undefined;
+  if (!entry) {
+    throw new Error(`node ${nodeId ?? "(none)"} not in response; available: ${ids.join(", ") || "none"}`);
+  }
+  const map: MapEntry[] = [];
+  const root = walk(entry.document, 0, opts, entry.styles ?? {}, map);
+  if (!root) throw new Error(`root node ${entry.document.id} is hidden or has no bounding box`);
+  return {
+    design: { root },
+    componentMap: map,
+    viewport: { width: Math.round(root.frame.w), height: Math.round(root.frame.h) },
+  };
 }

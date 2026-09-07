@@ -1,7 +1,7 @@
 // test/extract/toSpec.test.ts
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { paintToHex, nodeTokens, nodeTokenSources } from "../../src/extract/toSpec";
+import { paintToHex, nodeTokens, nodeTokenSources, toSpec } from "../../src/extract/toSpec";
 import type { FigmaNode, FigmaNodesResponse } from "../../src/extract/figmaTypes";
 
 const fixture: FigmaNodesResponse = JSON.parse(
@@ -97,5 +97,57 @@ describe("nodeTokenSources", () => {
   it("returns undefined when nothing is bound", () => {
     const n = byId("1:5");
     expect(nodeTokenSources(n, nodeTokens(n), styles, {})).toBeUndefined();
+  });
+});
+
+describe("toSpec", () => {
+  it("emits visible, non-vector nodes in document order and one map entry each", () => {
+    const r = toSpec(fixture, "1:2");
+    expect(r.componentMap.map((e) => e.figmaNodeId)).toEqual(["1:2", "1:3", "1:4", "1:5", "1:9"]);
+    expect(r.design.root.children.map((c) => c.id)).toEqual(["1:3", "1:4", "1:5", "1:9"]);
+  });
+  it("sets viewport from the root box and keeps absolute frames", () => {
+    const r = toSpec(fixture, "1:2");
+    expect(r.viewport).toEqual({ width: 400, height: 300 });
+    expect(r.design.root.frame).toEqual({ x: 100, y: 200, w: 400, h: 300 });
+    expect(r.design.root.children[0]!.frame).toEqual({ x: 124, y: 224, w: 120, h: 40 });
+  });
+  it("treats a frame whose children are all vectors as a leaf", () => {
+    const icon = toSpec(fixture, "1:2").design.root.children.find((c) => c.id === "1:5")!;
+    expect(icon.children).toEqual([]);
+    expect(icon.tokens).toEqual({});
+  });
+  it("skips hidden nodes and their subtrees", () => {
+    const ids = toSpec(fixture, "1:2").componentMap.map((e) => e.figmaNodeId);
+    expect(ids).not.toContain("1:8");
+  });
+  it("skips nodes without a bounding box", () => {
+    const res: FigmaNodesResponse = JSON.parse(JSON.stringify(fixture));
+    res.nodes["1:2"]!.document.children![0]!.absoluteBoundingBox = null;
+    expect(toSpec(res, "1:2").componentMap.map((e) => e.figmaNodeId)).not.toContain("1:3");
+  });
+  it("honors maxDepth (0 = root only)", () => {
+    const r = toSpec(fixture, "1:2", { maxDepth: 0 });
+    expect(r.componentMap).toEqual([{ figmaNodeId: "1:2" }]);
+    expect(r.design.root.children).toEqual([]);
+  });
+  it("attaches tokenSources only where something is bound, resolving names when given", () => {
+    const r = toSpec(fixture, "1:2", { variableNames: { "VariableID:10:1": "color/primary" } });
+    const [btn, label, icon] = r.design.root.children;
+    expect(btn!.tokenSources).toEqual({ fill: "color/primary" });
+    expect(label!.tokenSources?.fontSize).toBe("text/button");
+    expect(icon!.tokenSources).toBeUndefined();
+    expect(r.design.root.tokenSources).toBeUndefined();
+  });
+  it("defaults to the first node in the response when nodeId is omitted", () => {
+    expect(toSpec(fixture, undefined).design.root.id).toBe("1:2");
+  });
+  it("names the available ids when the requested node is missing", () => {
+    expect(() => toSpec(fixture, "9:9")).toThrow(/9:9.*available: 1:2/);
+  });
+  it("rejects a hidden root", () => {
+    const res: FigmaNodesResponse = JSON.parse(JSON.stringify(fixture));
+    res.nodes["1:2"]!.document.visible = false;
+    expect(() => toSpec(res, "1:2")).toThrow(/hidden or has no bounding box/);
   });
 });
