@@ -1,0 +1,33 @@
+<!-- test/fixtures/page.extract.html -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: Arial, sans-serif; }
+      #screen { position: relative; width: 400px; height: 300px; background: #ffffff; }
+      #btn {
+        position: absolute; left: 24px; top: 24px; width: 120px; height: 40px;
+        background: #1d4ed8; border: 1px solid #1e40af; border-radius: 8px;
+      }
+      #label {
+        position: absolute; left: 40px; top: 34px; width: 88px; height: 20px;
+        color: #ffffff; font: 700 16px/20px Arial, sans-serif; letter-spacing: 0.5px;
+      }
+      #icon { position: absolute; left: 128px; top: 32px; width: 24px; height: 24px; }
+      #hero {
+        position: absolute; left: 24px; top: 80px; width: 352px; height: 120px;
+        background: linear-gradient(#1d4ed8, #ffffff); opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="screen" data-designfit-id="1:2">
+      <div id="btn" data-designfit-id="1:3"></div>
+      <span id="label" data-designfit-id="1:4">Continue</span>
+      <svg id="icon" data-designfit-id="1:5" viewBox="0 0 24 24"></svg>
+      <div id="hero" data-designfit-id="1:9"></div>
+    </div>
+  </body>
+</html>
