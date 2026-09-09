@@ -39,7 +39,7 @@ npx playwright install chromium
 ```
 
 ```json
-{ "mcpServers": { "designfit": { "command": "designfit" } } }
+{ "mcpServers": { "designfit": { "command": "designfit", "env": { "FIGMA_TOKEN": "<token>" } } } }
 ```
 
 > **Windows:** some MCP clients can't spawn a bare `designfit` (it resolves to `designfit.cmd`). Use `{ "command": "npx", "args": ["-y", "designfit"] }`, or point at the binary directly with `{ "command": "node", "args": ["<absolute-path>/node_modules/designfit/dist/index.js"] }`. The plugin install above already uses the `npx` form, so it isn't affected.

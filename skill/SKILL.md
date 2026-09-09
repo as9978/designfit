@@ -1,11 +1,11 @@
 ---
 name: designfit-fidelity-loop
-description: Use when implementing a Figma design as front-end code with an MCP-connected agent — builds the UI, then validates it against the design with designfit and self-corrects until it passes. Triggers on "implement this Figma frame", "make it match the design", "pixel-perfect from Figma".
+description: Use when implementing a Figma design as front-end code with an MCP-connected agent: extracts the design spec with designfit, builds the UI, validates it against the spec, and self-corrects until it passes. Triggers on "implement this Figma frame", "make it match the design", "pixel-perfect from Figma".
 ---
 
 # designfit — Design-Fidelity Loop
 
-Implement a Figma screen as code, then **prove** it matches by validating with the `designfit_validate` MCP tool and fixing what it reports. Repeat until `pass: true`.
+Extract the design spec with `designfit_extract`, implement the Figma screen as code, then **prove** it matches by validating with `designfit_validate` and fixing what it reports. Repeat until `pass: true`, then clean up the tags.
 
 ## Prerequisites
 
