@@ -29,7 +29,7 @@ Then once, to fetch the browser the measurement engine drives:
 npx playwright install chromium
 ```
 
-The plugin registers the `designfit_validate` MCP server and the `designfit-fidelity-loop` skill together — nothing to configure, nothing to copy by hand.
+The plugin registers the `designfit_extract` and `designfit_validate` MCP tools and the `designfit-fidelity-loop` skill together, and asks once for a Figma personal access token (optional: without it, extract accepts pasted `/nodes` JSON).
 
 **Any other MCP client — manually:**
 
@@ -46,11 +46,14 @@ npx playwright install chromium
 
 ## Use
 
-Connect Figma's MCP too, then ask your agent to implement a frame. The `designfit-fidelity-loop` skill drives: build → tag elements with `data-designfit-id` → `designfit_validate` → fix → repeat until `pass`.
+Ask your agent to implement a Figma frame and give it the frame's link. The `designfit-fidelity-loop` skill drives: `designfit_extract` → build → tag elements with `data-designfit-id` → `designfit_validate` → fix → repeat until `pass` → strip the tags.
 
 If you installed the plugin, the skill is already registered. On a manual install it isn't: skills aren't auto-loaded from an npm dependency, so copy the one that ships at `skill/SKILL.md` into your agent's skills directory (for Claude Code: `.claude/skills/designfit-fidelity-loop/SKILL.md`) so it can be discovered.
 
-The one tool, `designfit_validate`, takes `{ url, viewport, design, componentMap, tolerances? }` and returns `{ pass, score, violations, unmapped }`.
+Two tools:
+
+- `designfit_extract` takes a Figma link (`{ url }`), or `{ fileKey, nodeId }`, or a pasted `GET /v1/files/:key/nodes` body (`{ nodes }`), plus optional `maxDepth`, and returns `{ design, componentMap, viewport }`. Fetching needs `FIGMA_TOKEN` in the MCP server's environment. Hidden nodes are skipped and a frame made only of vectors is one leaf.
+- `designfit_validate` takes `{ url, viewport, design, componentMap, tolerances? }` and returns `{ pass, score, violations, unmapped }`.
 
 For a full walkthrough on a real Figma frame — the loop, a copy-paste prompt, and troubleshooting — see [docs/validating-a-figma-frame.md](docs/validating-a-figma-frame.md).
 

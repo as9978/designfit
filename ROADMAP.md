@@ -5,10 +5,15 @@ maintained by one person, the order below is driven by what actually breaks for 
 it, and some of what's listed under *Exploring* may never ship. What you can rely on is the
 rule at the bottom.
 
-## Where v0.1 stands
+## Where v0.2 stands
 
-designfit does exactly three things today, against **one viewport** — the breakpoint the Figma
-frame was designed at.
+designfit does four things today, against **one viewport**: the breakpoint the Figma frame
+was designed at.
+
+**Extract** (`designfit_extract`): turns a Figma frame into the `DesignSpec` + `componentMap` +
+`viewport` that validate consumes, from a Figma link (REST API, `FIGMA_TOKEN`) or from pasted
+`/nodes` JSON. Bound variables and published styles become `tokenSources`, so the enforced set is
+the designer's, not the agent's. Deterministic: same node JSON in, same spec out.
 
 **Design tokens** — eleven resolved properties: `fill`, `color`, `fontFamily`, `fontSize`,
 `fontWeight`, `lineHeight`, `letterSpacing`, `borderRadius`, `borderColor`, `borderWidth`,
@@ -27,7 +32,7 @@ literal is a `warn` — it appears in the fix-list but doesn't fail the run or a
 because a value with no token behind it can only ever be fixed to a magic number. Geometry is
 always an `error`. `pass` is true when there are zero errors.
 
-### Not in v0.1, deliberately
+### Not in v0.2, deliberately
 
 - **Responsive validation.** One viewport per call. Multi-breakpoint is the v1.0 line below.
 - **Perceptual judgment.** Nothing fuzzy sits in the pass/fail path. See the rule at the bottom.
@@ -41,19 +46,19 @@ Roughly in this order. Each one extends the deterministic core.
 1. **Spacing tokens.** `padding*` and `gap`/`itemSpacing` from Figma auto-layout as first-class
    token checks, so spacing violations name the token instead of reading as a box delta. This is
    the largest gap in the current property set.
-2. **`designfit_extract`.** A second MCP tool that turns Figma node JSON into a `DesignSpec`,
-   replacing the hand-assembled `design` payload — today's most error-prone step, and the main
-   source of garbage-in results.
-3. **CLI + CI mode.** A `designfit validate --config` subcommand with exit codes, JSON output,
+2. **CLI + CI mode.** A `designfit validate --config` subcommand with exit codes, JSON output,
    and `--baseline` score-regression comparison, plus a published GitHub Action. Turns designfit
    from a build-loop tool into a regression guard on every PR.
-4. **Shadows, gradients, per-corner radii.** `box-shadow` against Figma effects, gradient fills
+3. **Shadows, gradients, per-corner radii.** `box-shadow` against Figma effects, gradient fills
    by stops and angle, and all four corner radii — today only the top-left is compared.
 
 ## Exploring
 
 Genuinely uncertain. Listed so you know it's been considered, not so you can plan around it.
 
+- **Tokenless extract**: parse Figma MCP `get_metadata` output so extract works without a REST
+  token. Geometry only (that output carries no fills or typography) on an undocumented format;
+  worth it only if people cannot get a token.
 - **Auto-mapping** — propose the `componentMap` by matching DOM against design nodes on geometry
   and text content, for the agent to confirm. Aimed at the biggest adoption friction: tagging
   every element with `data-designfit-id` by hand.

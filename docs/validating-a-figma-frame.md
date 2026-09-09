@@ -4,7 +4,7 @@ designfit works as a loop: your coding agent builds a frame, tags what it built,
 
 ## Prerequisites
 
-- **designfit installed.** In Claude Code, install the plugin and you're done: `/plugin marketplace add as9978/designfit`, then `/plugin install designfit@designfit` registers the MCP server and the skill together. For any other MCP client: `npm i -g designfit`, then `{ "mcpServers": { "designfit": { "command": "designfit" } } }`. (Or from a clone: `npm run build`, then point the client at `node dist/index.js`.) Either way, run `npx playwright install chromium` once.
+- **designfit installed.** In Claude Code, install the plugin and you're done: `/plugin marketplace add as9978/designfit`, then `/plugin install designfit@designfit` registers both MCP tools and the skill together, and prompts for a Figma personal access token (paste one so `designfit_extract` can read frames directly; leave it empty to paste `/nodes` JSON instead). For any other MCP client: `npm i -g designfit`, then `{ "mcpServers": { "designfit": { "command": "designfit", "env": { "FIGMA_TOKEN": "<token>" } } } }`. (Or from a clone: `npm run build`, then point the client at `node dist/index.js`.) Either way, run `npx playwright install chromium` once.
 - **Figma's MCP connected** in the same session, so the agent can read the frame's tokens and geometry.
 - **A dev server running** for the app you're implementing into — note its URL.
 - **The skill discoverable.** The plugin registers it for you. On a manual install, copy `skill/SKILL.md` to `.claude/skills/designfit-fidelity-loop/SKILL.md` (skills aren't auto-loaded from an npm dependency).
@@ -14,7 +14,7 @@ designfit works as a loop: your coding agent builds a frame, tags what it built,
 
 The `designfit-fidelity-loop` skill drives it; the shape is:
 
-1. **Relay the spec** — pull the frame's geometry + tokens from the Figma MCP into a `DesignSpec` and a `componentMap` (one entry per element: `{ figmaNodeId, selector? }`).
+1. **Extract the spec** with `designfit_extract` from the frame's Figma link. It returns the `DesignSpec`, the `componentMap`, and the `viewport`. (Without a token, the skill falls back to relaying the spec from the Figma MCP by hand.)
 2. **Build** the frame in your dev app.
 3. **Tag** each built element with `data-designfit-id="<figmaNodeId>"` so designfit can locate it in the DOM.
 4. **Validate** — call `designfit_validate` with `{ url, viewport, design, componentMap }`.
