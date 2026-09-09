@@ -160,11 +160,22 @@ function walk(
  * Deterministic: no network, no heuristics beyond the documented filter rules.
  */
 export function toSpec(response: FigmaNodesResponse, nodeId: string | undefined, opts: ToSpecOptions = {}): ExtractResult {
-  const ids = Object.keys(response.nodes ?? {});
+  const entries = response.nodes ?? {};
+  const ids = Object.keys(entries).filter((k) => entries[k] != null);
   const key = nodeId ?? ids[0];
-  const entry = key ? response.nodes[key] : undefined;
+  const entry = key ? entries[key] : undefined;
+  if (key && key in entries && entries[key] === null) {
+    throw new Error(
+      `Figma returned no node for ${key}; check the node-id in the link and that the token can read this file`,
+    );
+  }
   if (!entry) {
     throw new Error(`node ${nodeId ?? "(none)"} not in response; available: ${ids.join(", ") || "none"}`);
+  }
+  if (!entry.document || typeof entry.document !== "object") {
+    throw new Error(
+      `entry ${key} has no \`document\`; pass the raw body of GET /v1/files/<fileKey>/nodes?ids=<nodeId> (shape: { nodes: { "<id>": { document, styles } } })`,
+    );
   }
   const map: MapEntry[] = [];
   const root = walk(entry.document, 0, opts, entry.styles ?? {}, map);
@@ -172,6 +183,6 @@ export function toSpec(response: FigmaNodesResponse, nodeId: string | undefined,
   return {
     design: { root },
     componentMap: map,
-    viewport: { width: Math.round(root.frame.w), height: Math.round(root.frame.h) },
+    viewport: { width: Math.max(1, Math.round(root.frame.w)), height: Math.max(1, Math.round(root.frame.h)) },
   };
 }

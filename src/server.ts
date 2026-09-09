@@ -40,9 +40,10 @@ export async function runExtract(raw: unknown, deps: ExtractDeps = {}): Promise<
   const opts: ToSpecOptions = { maxDepth: args.maxDepth };
   if (args.nodes) return toSpec(args.nodes as unknown as FigmaNodesResponse, args.nodeId, opts);
 
+  // Safe: ExtractInputSchema's superRefine guarantees exactly one source and nodeId with fileKey.
   const { fileKey, nodeId } = args.url ? parseFigmaUrl(args.url) : { fileKey: args.fileKey!, nodeId: args.nodeId! };
   const token = (deps.env ?? process.env).FIGMA_TOKEN;
-  if (!token) {
+  if (!token || !token.trim() || token.includes("${")) {
     throw new Error(
       "FIGMA_TOKEN is not set on the designfit MCP server. Set it (a Figma personal access token), " +
         "or fetch GET https://api.figma.com/v1/files/<fileKey>/nodes?ids=<nodeId> yourself and pass the body as `nodes`.",

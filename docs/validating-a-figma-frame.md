@@ -18,7 +18,7 @@ The `designfit-fidelity-loop` skill drives it; the shape is:
 2. **Build** the frame in your dev app.
 3. **Tag** each built element with `data-designfit-id="<figmaNodeId>"` so designfit can locate it in the DOM.
 4. **Validate** — call `designfit_validate` with `{ url, viewport, design, componentMap }`.
-5. **Fix** the reported violations (errors first; `warn`s are advisory — hardcoded values with no Figma token).
+5. **Fix** the reported violations (errors first; `warn`s are advisory: values with no Figma variable or style behind them).
 6. **Repeat** from step 4 until `pass: true`.
 
 ## Copy-paste prompt
@@ -42,5 +42,6 @@ Try it on 2–3 frames of increasing complexity (button row → card → small f
 
 - **Element reported missing (`unmapped.inDesignNotFound`)** — the `data-designfit-id` doesn't match the `figmaNodeId`, or a `selector` override is wrong.
 - **Persistent geometry errors that look correct** — confirm the `viewport` matches the Figma frame size; boxes are compared relative to the screen root.
-- **A mismatch shows as `warn`, not `error`** — that property is hardcoded in the build (no `tokenSources` entry). Bind it to a token to enforce it, or leave it if intentional.
+- **A mismatch shows as `warn`, not `error`**: that property is not bound to a Figma variable or published style (no `tokenSources` entry). Bind it in Figma to enforce it, or leave it if intentional.
 - **Fixes fighting each other** — capture the per-iteration results; if two properties trade blame across rounds, that's worth filing as an issue (with the captures) rather than retrying.
+- **Token names look like `VariableID:12:34`**: Figma's variables endpoint is Enterprise-only, so on other plans extract keeps the raw variable id as the source name. Enforcement is unaffected; only the label in `fixHint` is less readable.

@@ -23,6 +23,12 @@ describe("parseFigmaUrl", () => {
   it("rejects a non-Figma link", () => {
     expect(() => parseFigmaUrl("https://example.com/design/AbC123?node-id=1-2")).toThrow(/Figma/);
   });
+  it("rejects a look-alike host", () => {
+    expect(() => parseFigmaUrl("https://evilfigma.com/design/AbC123/Demo?node-id=1-2")).toThrow(/Figma/);
+  });
+  it("accepts a figma.com subdomain", () => {
+    expect(parseFigmaUrl("https://www.figma.com/design/AbC123/Demo?node-id=1-2").nodeId).toBe("1:2");
+  });
 });
 
 describe("fetchNodes", () => {
@@ -37,6 +43,10 @@ describe("fetchNodes", () => {
   it("throws with the status and file key on a non-200", async () => {
     const f = fakeFetch(() => json({ err: "nope" }, 404));
     await expect(fetchNodes("AbC123", "1:2", "tok", f as unknown as Fetch)).rejects.toThrow(/404.*AbC123/);
+  });
+  it("explains a 403 as a token that cannot read the file", async () => {
+    const f = fakeFetch(() => json({ err: "forbidden" }, 403));
+    await expect(fetchNodes("AbC123", "1:2", "tok", f as unknown as Fetch)).rejects.toThrow(/403.*cannot read this file.*not retrying/);
   });
 });
 

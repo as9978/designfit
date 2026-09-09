@@ -6,7 +6,7 @@ const API = "https://api.figma.com/v1";
 /** https://www.figma.com/design/<fileKey>/<name>?node-id=1-2  ->  { fileKey, nodeId: "1:2" } */
 export function parseFigmaUrl(url: string): { fileKey: string; nodeId: string } {
   const u = new URL(url);
-  const m = u.hostname.endsWith("figma.com") ? u.pathname.match(/^\/(?:design|file|proto)\/([A-Za-z0-9]+)/) : null;
+  const m = /(^|\.)figma\.com$/.test(u.hostname) ? u.pathname.match(/^\/(?:design|file|proto)\/([A-Za-z0-9]+)/) : null;
   if (!m) throw new Error(`not a Figma file link: ${url}`);
   const nodeParam = u.searchParams.get("node-id");
   if (!nodeParam) throw new Error(`Figma link has no node-id query param (select a frame and copy its link): ${url}`);
@@ -24,7 +24,12 @@ export async function fetchNodes(
   fetchImpl: typeof fetch = fetch,
 ): Promise<FigmaNodesResponse> {
   const res = await get(`/files/${encodeURIComponent(fileKey)}/nodes?ids=${encodeURIComponent(nodeId)}`, token, fetchImpl);
-  if (res.status !== 200) throw new Error(`Figma API returned ${res.status} fetching nodes for file ${fileKey}`);
+  if (res.status !== 200) {
+    const hint =
+      res.status === 403 ? " (the token cannot read this file)" :
+      res.status === 404 ? " (no file with this key)" : "";
+    throw new Error(`Figma API returned ${res.status} fetching nodes for file ${fileKey}${hint}; not retrying`);
+  }
   return (await res.json()) as FigmaNodesResponse;
 }
 

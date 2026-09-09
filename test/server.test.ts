@@ -2,7 +2,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { runValidation, runExtract } from "../src/server";
-import type { ToolInput } from "../src/schema";
+import { ToolInputSchema, type ToolInput } from "../src/schema";
 
 // new URL(...).href yields a valid file:// URL on every platform.
 const url = (name: string) => new URL(`fixtures/${name}`, import.meta.url).href;
@@ -87,5 +87,16 @@ describe("runExtract", () => {
 
   it("rejects an input with no source before doing any work", async () => {
     await expect(runExtract({})).rejects.toThrow(/exactly one/);
+  });
+  it("treats an unsubstituted userConfig placeholder as an unset token", async () => {
+    await expect(runExtract({ url: figmaLink }, { env: { FIGMA_TOKEN: "${user_config.figma_token}" } })).rejects.toThrow(/FIGMA_TOKEN/);
+  });
+  it("produces output that designfit_validate's own schema accepts", async () => {
+    const extracted = await runExtract({ nodes: figmaFixture });
+    expect(() => ToolInputSchema.parse({ url: url("page.extract.html"), ...extracted })).not.toThrow();
+  });
+  it("threads maxDepth through to the transform", async () => {
+    const r = await runExtract({ nodes: figmaFixture, maxDepth: 0 });
+    expect(r.componentMap).toEqual([{ figmaNodeId: "1:2" }]);
   });
 });

@@ -150,4 +150,20 @@ describe("toSpec", () => {
     res.nodes["1:2"]!.document.visible = false;
     expect(() => toSpec(res, "1:2")).toThrow(/hidden or has no bounding box/);
   });
+  it("names a null entry as unresolved rather than listing it as available", () => {
+    expect(() => toSpec({ nodes: { "9:9": null } }, "9:9")).toThrow(/no node for 9:9/);
+  });
+  it("lists only resolvable ids when the requested one is absent", () => {
+    const res: FigmaNodesResponse = { nodes: { "1:2": fixture.nodes["1:2"]!, "5:5": null } };
+    expect(() => toSpec(res, "7:7")).toThrow(/available: 1:2$/);
+  });
+  it("rejects an entry without a document and says what shape it wanted", () => {
+    const res = { nodes: { "1:2": { styles: {} } } } as unknown as FigmaNodesResponse;
+    expect(() => toSpec(res, "1:2")).toThrow(/no `document`.*GET \/v1\/files/);
+  });
+  it("never emits a viewport dimension below 1", () => {
+    const res: FigmaNodesResponse = JSON.parse(JSON.stringify(fixture));
+    res.nodes["1:2"]!.document.absoluteBoundingBox = { x: 0, y: 0, width: 0.2, height: 0.2 };
+    expect(toSpec(res, "1:2", { maxDepth: 0 }).viewport).toEqual({ width: 1, height: 1 });
+  });
 });
