@@ -22,7 +22,7 @@ docs/LAUNCH-PLAN.md
 docs/blog/
 docs/launch/
 
-# Local demo scaffolding — used to generate assets/hero.png + the release video; not public repo content
+# Local demo scaffolding — used to generate the demo video; not public repo content
 demo/
 
 # MCP Registry publisher binary (downloaded locally)

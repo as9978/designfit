@@ -1,10 +1,10 @@
 # designfit
 
-![designfit validates an AI-built UI against its Figma design and returns a deterministic fix-list: token and geometry violations with the exact source token and delta, score 82 fail to 100 pass](assets/hero.png)
-
 **Validate AI-built front-ends against their Figma design — without the screenshot-diff thrash.**
 
-▶ **[Watch the demo](https://github.com/as9978/designfit/releases/tag/v0.1.0)** — the fidelity loop closing in real time: Figma and the build side by side, score climbing to `pass`, no screenshot diffing anywhere in it.
+https://github.com/user-attachments/assets/01df52c9-90eb-4abc-b56c-fe18b31076cd
+
+A real run on a 360-node Figma frame: `designfit_extract` reads the frame from its link, then `designfit_validate` scores three build iterations, 87 to 89 to 100 `pass`. No screenshot diffing anywhere in it.
 
 `designfit` is an MCP server + Claude Code skill that checks a rendered implementation against its Figma design and hands the coding agent a machine-actionable fix-list. It compares **design tokens** and **geometry** (element boxes relative to the screen root) — not raw pixels — so font-rendering noise never makes the agent oscillate. Deterministic in, deterministic out.
 
