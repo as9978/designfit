@@ -26,6 +26,12 @@ describe("parseFigmaUrl", () => {
   it("rejects a look-alike host", () => {
     expect(() => parseFigmaUrl("https://evilfigma.com/design/AbC123/Demo?node-id=1-2")).toThrow(/Figma/);
   });
+  it("reads the branch key from a branch link", () => {
+    expect(parseFigmaUrl("https://www.figma.com/design/AbC123/branch/BrX9/Demo?node-id=1-2")).toEqual({
+      fileKey: "BrX9",
+      nodeId: "1:2",
+    });
+  });
   it("accepts a figma.com subdomain", () => {
     expect(parseFigmaUrl("https://www.figma.com/design/AbC123/Demo?node-id=1-2").nodeId).toBe("1:2");
   });
@@ -39,6 +45,12 @@ describe("fetchNodes", () => {
     const [url, init] = f.mock.calls[0]!;
     expect(url).toBe("https://api.figma.com/v1/files/AbC123/nodes?ids=1%3A2");
     expect((init!.headers as Record<string, string>)["X-Figma-Token"]).toBe("tok");
+    expect(init!.signal).toBeInstanceOf(AbortSignal);
+  });
+  it("asks Figma for maxDepth + 1 levels when maxDepth is set", async () => {
+    const f = fakeFetch(() => json({ nodes: {} }));
+    await fetchNodes("AbC123", "1:2", "tok", f as unknown as Fetch, 0);
+    expect(f.mock.calls[0]![0]).toBe("https://api.figma.com/v1/files/AbC123/nodes?ids=1%3A2&depth=1");
   });
   it("throws with the status and file key on a non-200", async () => {
     const f = fakeFetch(() => json({ err: "nope" }, 404));

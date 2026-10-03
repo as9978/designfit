@@ -23,6 +23,10 @@ describe("paintToHex", () => {
     expect(paintToHex({ type: "SOLID", color: { r: 0, g: 0, b: 0, a: 1 }, opacity: 0.5 })).toBe("#00000080");
     expect(paintToHex({ type: "SOLID", color: { r: 1, g: 1, b: 1, a: 0.5 } })).toBe("#ffffff80");
   });
+  it("returns undefined for a fully transparent paint", () => {
+    expect(paintToHex({ type: "SOLID", color: { r: 1, g: 1, b: 1, a: 1 }, opacity: 0 })).toBeUndefined();
+    expect(paintToHex({ type: "SOLID", color: { r: 1, g: 1, b: 1, a: 0 } })).toBeUndefined();
+  });
   it("returns undefined for hidden, non-solid, or colorless paints", () => {
     expect(paintToHex({ type: "SOLID", visible: false, color: { r: 1, g: 0, b: 0, a: 1 } })).toBeUndefined();
     expect(paintToHex({ type: "GRADIENT_LINEAR" })).toBeUndefined();
@@ -57,6 +61,23 @@ describe("nodeTokens", () => {
   it("uses the top-left radius when corners differ", () => {
     expect(nodeTokens({ id: "x", name: "x", type: "RECTANGLE", rectangleCornerRadii: [4, 8, 8, 4] })).toEqual({ borderRadius: 4 });
   });
+  it("uses the top-most visible solid paint (Figma orders paints bottom to top)", () => {
+    const n: FigmaNode = {
+      id: "x",
+      name: "x",
+      type: "RECTANGLE",
+      fills: [
+        { type: "SOLID", color: { r: 1, g: 1, b: 1, a: 1 } },
+        { type: "SOLID", color: { r: 0, g: 0, b: 0, a: 1 } },
+        { type: "SOLID", visible: false, color: { r: 1, g: 0, b: 0, a: 1 } },
+      ],
+    };
+    expect(nodeTokens(n)).toEqual({ fill: "#000000" });
+  });
+  it("emits no paint tokens for an SVG shape, whose fill and stroke are not CSS background or border", () => {
+    const n: FigmaNode = { ...byId("1:3"), type: "VECTOR" };
+    expect(nodeTokens(n)).toEqual({ borderRadius: 8 });
+  });
   it("drops a stroke with zero weight", () => {
     const n: FigmaNode = { ...byId("1:3"), strokeWeight: 0 };
     expect(nodeTokens(n)).toEqual({ fill: "#1d4ed8", borderRadius: 8 });
@@ -71,6 +92,24 @@ describe("nodeTokenSources", () => {
   it("resolves a bound variable to its name", () => {
     const n = byId("1:3");
     expect(nodeTokenSources(n, nodeTokens(n), styles, { "VariableID:10:1": "color/primary" })).toEqual({ fill: "color/primary" });
+  });
+  it("reads the node-level fill alias for the paint that was emitted", () => {
+    const n: FigmaNode = {
+      id: "x",
+      name: "x",
+      type: "RECTANGLE",
+      fills: [
+        { type: "SOLID", visible: false, color: { r: 1, g: 0, b: 0, a: 1 } },
+        { type: "SOLID", color: { r: 0, g: 0, b: 0, a: 1 } },
+      ],
+      boundVariables: {
+        fills: [
+          { type: "VARIABLE_ALIAS", id: "VariableID:1:1" },
+          { type: "VARIABLE_ALIAS", id: "VariableID:2:2" },
+        ],
+      },
+    };
+    expect(nodeTokenSources(n, nodeTokens(n), styles, {})).toEqual({ fill: "VariableID:2:2" });
   });
   it("binds every typography token to a text style's name", () => {
     const n = byId("1:4");

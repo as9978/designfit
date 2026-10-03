@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { DesignNode, Tolerances } from "./types";
 import { DEFAULT_TOLERANCES } from "./defaults";
 import { toHex } from "./color";
+import { normalizeNodeId } from "./extract/figma";
 
 /** A CSS color string that must be parseable — malformed design colors are rejected at the boundary. */
 const colorString = z.string().refine((s) => toHex(s) !== null, {
@@ -108,7 +109,7 @@ const ExtractInputBase = z.object({
 /** Raw Zod shape for MCP registerTool (which cannot take a refined schema). */
 export const extractInputShape = ExtractInputBase.shape;
 
-/** Refined: exactly one source; fileKey needs nodeId. runExtract parses with this. */
+/** Refined: exactly one source; fileKey needs nodeId; nodeId arrives in 1:2 form. runExtract parses with this. */
 export const ExtractInputSchema = ExtractInputBase.superRefine((v, ctx) => {
   const sources = [v.url, v.fileKey, v.nodes].filter((s) => s !== undefined).length;
   if (sources !== 1) {
@@ -117,5 +118,4 @@ export const ExtractInputSchema = ExtractInputBase.superRefine((v, ctx) => {
   if (v.fileKey !== undefined && v.nodeId === undefined) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: "nodeId is required with fileKey", path: ["nodeId"] });
   }
-});
-export type ExtractInput = z.infer<typeof ExtractInputSchema>;
+}).transform((v) => (v.nodeId === undefined ? v : { ...v, nodeId: normalizeNodeId(v.nodeId) }));

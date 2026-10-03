@@ -1,69 +1,101 @@
 // src/extract/toSpec.ts
 import type { DesignNode, DesignTokens, MapEntry, TokenProperty, Viewport } from "../types";
-import type { FigmaNode, FigmaNodesResponse, FigmaPaint, FigmaStyleMeta } from "./figmaTypes";
+import type { FigmaNode, FigmaNodesResponse, FigmaPaint, FigmaStyleMeta, FigmaTypeStyle, FigmaVariableAlias } from "./figmaTypes";
+import { rgbaToHex } from "../color";
 
-const to255 = (c: number) => Math.round(Math.min(1, Math.max(0, c)) * 255).toString(16).padStart(2, "0");
-
-/** Figma {r,g,b,a} floats (times the paint's own opacity) to #rrggbb, or #rrggbbaa when alpha < 1. */
+/**
+ * Figma {r,g,b,a} floats (times the paint's own opacity) to #rrggbb, or #rrggbbaa when alpha < 1.
+ * A fully transparent paint is no paint: the browser reports it as no value.
+ */
 export function paintToHex(paint: FigmaPaint): string | undefined {
   if (paint.type !== "SOLID" || paint.visible === false || !paint.color) return undefined;
   const { r, g, b, a } = paint.color;
-  const alpha = a * (paint.opacity ?? 1);
-  const rgb = `#${to255(r)}${to255(g)}${to255(b)}`;
-  return alpha < 1 ? `${rgb}${to255(alpha)}` : rgb;
+  return rgbaToHex(r, g, b, a * (paint.opacity ?? 1));
 }
 
-function firstSolid(paints: FigmaPaint[] | undefined): FigmaPaint | undefined {
-  return paints?.find((p) => p.type === "SOLID" && p.visible !== false);
+type BoundValue = NonNullable<FigmaNode["boundVariables"]>[string];
+
+interface PickedPaint {
+  hex: string;
+  alias?: FigmaVariableAlias;
 }
+
+/**
+ * The paint a node renders as a CSS color: the top-most visible solid (Figma orders paints
+ * bottom to top), with its variable alias from either place Figma puts it.
+ */
+function topSolid(paints: FigmaPaint[] | undefined, bound: BoundValue): PickedPaint | undefined {
+  for (let i = (paints?.length ?? 0) - 1; i >= 0; i--) {
+    const paint = paints![i]!;
+    const hex = paintToHex(paint);
+    if (hex === undefined) continue;
+    return { hex, alias: paint.boundVariables?.color ?? (Array.isArray(bound) ? bound[i] : bound) };
+  }
+  return undefined;
+}
+
+/** When ALL of a node's children have one of these types, the node is an icon: emit it, don't descend. */
+const VECTOR_TYPES = new Set(["VECTOR", "BOOLEAN_OPERATION", "LINE", "STAR", "REGULAR_POLYGON"]);
+
+/**
+ * The fill and stroke a node contributes as CSS colors. Vector shapes other than LINE render
+ * their paint as SVG fill/stroke, which `measure` does not read (it reads background and border);
+ * a LINE's stroke is commonly built as a CSS border.
+ */
+function nodePaints(node: FigmaNode): { fill?: PickedPaint; stroke?: PickedPaint } {
+  if (VECTOR_TYPES.has(node.type) && node.type !== "LINE") return {};
+  const stroked = node.strokeWeight !== undefined && node.strokeWeight > 0;
+  return {
+    fill: topSolid(node.fills, node.boundVariables?.fills),
+    stroke: stroked ? topSolid(node.strokes, node.boundVariables?.strokes) : undefined,
+  };
+}
+
+/** A text node's "fill" is its text color; a box's fill is its background. */
+const paintProp = (node: FigmaNode): TokenProperty => (node.type === "TEXT" ? "color" : "fill");
+
+const TEXT_STYLE_KEYS: [keyof FigmaTypeStyle, TokenProperty][] = [
+  ["fontFamily", "fontFamily"],
+  ["fontSize", "fontSize"],
+  ["fontWeight", "fontWeight"],
+  ["lineHeightPx", "lineHeight"],
+  ["letterSpacing", "letterSpacing"],
+];
 
 /** Only the properties the node actually specifies are emitted; absent => not checked. */
 export function nodeTokens(node: FigmaNode): DesignTokens {
-  const t: DesignTokens = {};
-  const fill = firstSolid(node.fills);
-  const fillHex = fill && paintToHex(fill);
-  if (fillHex) {
-    // A text node's "fill" is its text color; a box's fill is its background.
-    if (node.type === "TEXT") t.color = fillHex;
-    else t.fill = fillHex;
-  }
+  const t: Record<string, string | number> = {};
+  const { fill, stroke } = nodePaints(node);
+  if (fill) t[paintProp(node)] = fill.hex;
   if (node.type === "TEXT" && node.style) {
-    const s = node.style;
-    if (s.fontFamily !== undefined) t.fontFamily = s.fontFamily;
-    if (s.fontSize !== undefined) t.fontSize = s.fontSize;
-    if (s.fontWeight !== undefined) t.fontWeight = s.fontWeight;
-    if (s.lineHeightPx !== undefined) t.lineHeight = s.lineHeightPx;
-    if (s.letterSpacing !== undefined) t.letterSpacing = s.letterSpacing;
+    for (const [key, prop] of TEXT_STYLE_KEYS) {
+      const v = node.style[key];
+      if (v !== undefined) t[prop] = v;
+    }
   }
   // Top-left only: that is the corner `measure` reads (borderTopLeftRadius).
   const radius = node.cornerRadius ?? node.rectangleCornerRadii?.[0];
   if (radius !== undefined) t.borderRadius = radius;
-  const stroke = firstSolid(node.strokes);
-  const strokeHex = stroke && paintToHex(stroke);
-  if (strokeHex && node.strokeWeight !== undefined && node.strokeWeight > 0) {
-    t.borderColor = strokeHex;
-    t.borderWidth = node.strokeWeight;
+  if (stroke) {
+    t.borderColor = stroke.hex;
+    t.borderWidth = node.strokeWeight!;
   }
   if (node.opacity !== undefined && node.opacity !== 1) t.opacity = node.opacity;
-  return t;
+  return t as DesignTokens;
 }
 
-const TEXT_STYLE_PROPS: TokenProperty[] = ["fontFamily", "fontSize", "fontWeight", "lineHeight", "letterSpacing"];
-
-/** Figma `boundVariables` key -> designfit token property. `fills` is remapped to `color` on TEXT nodes. */
-const VARIABLE_KEYS: Record<string, TokenProperty> = {
-  fills: "fill",
-  strokes: "borderColor",
-  strokeWeight: "borderWidth",
-  cornerRadius: "borderRadius",
-  topLeftRadius: "borderRadius",
-  opacity: "opacity",
-  fontFamily: "fontFamily",
-  fontSize: "fontSize",
-  fontWeight: "fontWeight",
-  lineHeight: "lineHeight",
-  letterSpacing: "letterSpacing",
-};
+/** Figma scalar `boundVariables` key -> designfit token property. Paint aliases come from `nodePaints`. */
+const VARIABLE_KEYS: [string, TokenProperty][] = [
+  ["strokeWeight", "borderWidth"],
+  ["cornerRadius", "borderRadius"],
+  ["topLeftRadius", "borderRadius"],
+  ["opacity", "opacity"],
+  ["fontFamily", "fontFamily"],
+  ["fontSize", "fontSize"],
+  ["fontWeight", "fontWeight"],
+  ["lineHeight", "lineHeight"],
+  ["letterSpacing", "letterSpacing"],
+];
 
 /**
  * Which token properties are bound to a named design decision. Published styles resolve
@@ -78,27 +110,26 @@ export function nodeTokenSources(
   variableNames: Record<string, string>,
 ): Partial<Record<TokenProperty, string>> | undefined {
   const out: Partial<Record<TokenProperty, string>> = {};
-  const paintProp: TokenProperty = node.type === "TEXT" ? "color" : "fill";
   const styleName = (id: string | undefined) => (id ? styles[id]?.name : undefined);
+  const name = (id: string) => variableNames[id] ?? id;
 
   const fillStyle = styleName(node.styles?.fill);
-  if (fillStyle) out[paintProp] = fillStyle;
+  if (fillStyle) out[paintProp(node)] = fillStyle;
   const strokeStyle = styleName(node.styles?.stroke);
   if (strokeStyle) out.borderColor = strokeStyle;
   const textStyle = styleName(node.styles?.text);
-  if (textStyle) for (const p of TEXT_STYLE_PROPS) out[p] = textStyle;
+  if (textStyle) for (const [, prop] of TEXT_STYLE_KEYS) out[prop] = textStyle;
 
-  const name = (id: string) => variableNames[id] ?? id;
-  for (const [key, prop] of Object.entries(VARIABLE_KEYS)) {
-    const bound = node.boundVariables?.[key];
-    const alias = Array.isArray(bound) ? bound[0] : bound;
-    if (alias?.id) out[key === "fills" ? paintProp : prop] = name(alias.id);
+  if (node.boundVariables) {
+    for (const [key, prop] of VARIABLE_KEYS) {
+      const bound = node.boundVariables[key];
+      const alias = Array.isArray(bound) ? bound[0] : bound;
+      if (alias?.id) out[prop] = name(alias.id);
+    }
   }
-  // Figma also nests the alias on the paint itself; honor either placement.
-  const fillAlias = firstSolid(node.fills)?.boundVariables?.color;
-  if (fillAlias?.id) out[paintProp] = name(fillAlias.id);
-  const strokeAlias = firstSolid(node.strokes)?.boundVariables?.color;
-  if (strokeAlias?.id) out.borderColor = name(strokeAlias.id);
+  const { fill, stroke } = nodePaints(node);
+  if (fill?.alias?.id) out[paintProp(node)] = name(fill.alias.id);
+  if (stroke?.alias?.id) out.borderColor = name(stroke.alias.id);
 
   for (const p of Object.keys(out) as TokenProperty[]) if (tokens[p] === undefined) delete out[p];
   return Object.keys(out).length ? out : undefined;
@@ -116,9 +147,6 @@ export interface ToSpecOptions {
   /** VariableID -> variable name (from /variables/local). Unresolved ids stay raw. */
   variableNames?: Record<string, string>;
 }
-
-/** When ALL of a node's children have one of these types, the node is an icon: emit it, don't descend. */
-const VECTOR_TYPES = new Set(["VECTOR", "BOOLEAN_OPERATION", "LINE", "STAR", "REGULAR_POLYGON"]);
 
 function isIconLeaf(node: FigmaNode): boolean {
   return !!node.children && node.children.length > 0 && node.children.every((c) => VECTOR_TYPES.has(c.type));
@@ -164,7 +192,7 @@ export function toSpec(response: FigmaNodesResponse, nodeId: string | undefined,
   const ids = Object.keys(entries).filter((k) => entries[k] != null);
   const key = nodeId ?? ids[0];
   const entry = key ? entries[key] : undefined;
-  if (key && key in entries && entries[key] === null) {
+  if (entry === null) {
     throw new Error(
       `Figma returned no node for ${key}; check the node-id in the link and that the token can read this file`,
     );

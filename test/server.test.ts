@@ -85,6 +85,10 @@ describe("runExtract", () => {
     expect(r.design.root.children[0]!.tokenSources).toEqual({ fill: "VariableID:10:1" });
   });
 
+  it("accepts a nodeId in the link's dash form", async () => {
+    expect((await runExtract({ nodes: figmaFixture, nodeId: "1-2" })).design.root.id).toBe("1:2");
+  });
+
   it("rejects an input with no source before doing any work", async () => {
     await expect(runExtract({})).rejects.toThrow(/exactly one/);
   });
