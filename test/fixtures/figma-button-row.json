@@ -1,0 +1,78 @@
+{
+  "name": "designfit fixtures",
+  "nodes": {
+    "1:2": {
+      "document": {
+        "id": "1:2",
+        "name": "Screen",
+        "type": "FRAME",
+        "absoluteBoundingBox": { "x": 100, "y": 200, "width": 400, "height": 300 },
+        "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1, "a": 1 } }],
+        "children": [
+          {
+            "id": "1:3",
+            "name": "Button/Primary",
+            "type": "RECTANGLE",
+            "absoluteBoundingBox": { "x": 124, "y": 224, "width": 120, "height": 40 },
+            "fills": [{ "type": "SOLID", "color": { "r": 0.1137, "g": 0.3059, "b": 0.8471, "a": 1 } }],
+            "boundVariables": { "fills": [{ "type": "VARIABLE_ALIAS", "id": "VariableID:10:1" }] },
+            "strokes": [{ "type": "SOLID", "color": { "r": 0.1176, "g": 0.251, "b": 0.6863, "a": 1 } }],
+            "strokeWeight": 1,
+            "cornerRadius": 8
+          },
+          {
+            "id": "1:4",
+            "name": "Label",
+            "type": "TEXT",
+            "absoluteBoundingBox": { "x": 140, "y": 234, "width": 88, "height": 20 },
+            "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1, "a": 1 } }],
+            "style": { "fontFamily": "Arial", "fontWeight": 700, "fontSize": 16, "lineHeightPx": 20, "letterSpacing": 0.5 },
+            "styles": { "text": "S:abc" }
+          },
+          {
+            "id": "1:5",
+            "name": "Icon",
+            "type": "FRAME",
+            "absoluteBoundingBox": { "x": 228, "y": 232, "width": 24, "height": 24 },
+            "fills": [],
+            "children": [
+              {
+                "id": "1:6",
+                "name": "Vector",
+                "type": "VECTOR",
+                "absoluteBoundingBox": { "x": 230, "y": 234, "width": 20, "height": 20 },
+                "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 1, "b": 1, "a": 1 } }]
+              },
+              {
+                "id": "1:7",
+                "name": "Vector",
+                "type": "BOOLEAN_OPERATION",
+                "absoluteBoundingBox": { "x": 232, "y": 236, "width": 16, "height": 16 },
+                "fills": []
+              }
+            ]
+          },
+          {
+            "id": "1:8",
+            "name": "Hidden",
+            "type": "RECTANGLE",
+            "visible": false,
+            "absoluteBoundingBox": { "x": 124, "y": 280, "width": 100, "height": 20 },
+            "fills": [{ "type": "SOLID", "color": { "r": 1, "g": 0, "b": 0, "a": 1 } }]
+          },
+          {
+            "id": "1:9",
+            "name": "Hero",
+            "type": "RECTANGLE",
+            "absoluteBoundingBox": { "x": 124, "y": 280, "width": 352, "height": 120 },
+            "fills": [{ "type": "GRADIENT_LINEAR", "gradientStops": [] }],
+            "opacity": 0.5
+          }
+        ]
+      },
+      "styles": {
+        "S:abc": { "key": "abc", "name": "text/button", "styleType": "TEXT" }
+      }
+    }
+  }
+}

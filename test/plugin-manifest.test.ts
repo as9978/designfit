@@ -39,6 +39,17 @@ describe("Claude Code plugin manifest", () => {
       expect(existsSync(join(repoRoot, dir, "SKILL.md")), `${dir}SKILL.md missing`).toBe(true);
     }
   });
+
+  it("feeds the Figma token from userConfig into the MCP server env", () => {
+    expect(plugin.userConfig.figma_token.sensitive).toBe(true);
+    expect(plugin.userConfig.figma_token.required).toBe(false);
+    expect(plugin.mcpServers.designfit.env.FIGMA_TOKEN).toBe("${user_config.figma_token}");
+  });
+
+  it("matches the version the MCP server announces on handshake", () => {
+    const server = readFileSync(join(repoRoot, "src/server.ts"), "utf-8");
+    expect(server).toContain(`version: "${pkg.version}"`);
+  });
 });
 
 describe("Claude Code marketplace manifest", () => {

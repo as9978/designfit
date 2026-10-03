@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { DesignNode, Tolerances } from "./types";
 import { DEFAULT_TOLERANCES } from "./defaults";
 import { toHex } from "./color";
+import { normalizeNodeId } from "./extract/figma";
 
 /** A CSS color string that must be parseable — malformed design colors are rejected at the boundary. */
 const colorString = z.string().refine((s) => toHex(s) !== null, {
@@ -94,3 +95,27 @@ export function mergeTolerances(input?: PartialTolerances): Tolerances {
     borderRadius: { px: input?.borderRadius?.px ?? d.borderRadius.px },
   };
 }
+
+const ExtractInputBase = z.object({
+  url: z.string().url().optional(),
+  fileKey: z.string().min(1).optional(),
+  nodeId: z.string().min(1).optional(),
+  /** The raw body of GET /v1/files/:key/nodes, pasted. Only its outer shape is checked here. */
+  nodes: z.object({ nodes: z.record(z.unknown()) }).passthrough().optional(),
+  /** Levels below the root to emit. Omit for unlimited; 0 = root only. */
+  maxDepth: z.number().int().min(0).optional(),
+});
+
+/** Raw Zod shape for MCP registerTool (which cannot take a refined schema). */
+export const extractInputShape = ExtractInputBase.shape;
+
+/** Refined: exactly one source; fileKey needs nodeId; nodeId arrives in 1:2 form. runExtract parses with this. */
+export const ExtractInputSchema = ExtractInputBase.superRefine((v, ctx) => {
+  const sources = [v.url, v.fileKey, v.nodes].filter((s) => s !== undefined).length;
+  if (sources !== 1) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "provide exactly one of url, fileKey (+ nodeId), or nodes" });
+  }
+  if (v.fileKey !== undefined && v.nodeId === undefined) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "nodeId is required with fileKey", path: ["nodeId"] });
+  }
+}).transform((v) => (v.nodeId === undefined ? v : { ...v, nodeId: normalizeNodeId(v.nodeId) }));

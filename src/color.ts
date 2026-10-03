@@ -1,5 +1,5 @@
 // src/color.ts
-import { parse, formatHex, formatHex8, differenceCiede2000 } from "culori";
+import { parse, formatHex, formatHex8, differenceCiede2000, type Color } from "culori";
 
 const diff = differenceCiede2000();
 
@@ -23,7 +23,17 @@ export function isTransparent(input: string): boolean {
  */
 export function normalizeColor(input: string): string | undefined {
   const c = parse(input);
-  if (!c || c.alpha === 0) return undefined;
+  return c ? canonicalHex(c) : undefined;
+}
+
+/** The same canonical form for 0..1 RGBA channels (e.g. a Figma paint), so design and measured colors share one encoder. */
+export function rgbaToHex(r: number, g: number, b: number, alpha: number): string | undefined {
+  return canonicalHex({ mode: "rgb", r, g, b, alpha });
+}
+
+/** An alpha that rounds to 00 in 8-bit hex counts as fully transparent. */
+function canonicalHex(c: Color): string | undefined {
+  if (c.alpha !== undefined && Math.round(c.alpha * 255) === 0) return undefined;
   if (c.alpha !== undefined && c.alpha < 1) return formatHex8(c).toLowerCase();
   return formatHex(c).toLowerCase();
 }

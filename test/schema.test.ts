@@ -1,6 +1,6 @@
 // test/schema.test.ts
 import { describe, it, expect } from "vitest";
-import { ToolInputSchema, mergeTolerances } from "../src/schema";
+import { ToolInputSchema, mergeTolerances, ExtractInputSchema } from "../src/schema";
 import { DEFAULT_TOLERANCES } from "../src/defaults";
 
 const validInput = {
@@ -49,5 +49,31 @@ describe("mergeTolerances", () => {
     expect(merged.geometry.position).toBe(5);
     expect(merged.geometry.size).toBe(DEFAULT_TOLERANCES.geometry.size);
     expect(merged.color.deltaE).toBe(DEFAULT_TOLERANCES.color.deltaE);
+  });
+});
+
+describe("ExtractInputSchema", () => {
+  const link = "https://www.figma.com/design/AbC123/Demo?node-id=1-2";
+  it("accepts exactly one source: url", () => {
+    expect(() => ExtractInputSchema.parse({ url: link })).not.toThrow();
+  });
+  it("accepts fileKey + nodeId", () => {
+    expect(() => ExtractInputSchema.parse({ fileKey: "AbC123", nodeId: "1:2", maxDepth: 2 })).not.toThrow();
+  });
+  it("accepts a pasted nodes response", () => {
+    expect(() => ExtractInputSchema.parse({ nodes: { nodes: {} } })).not.toThrow();
+  });
+  it("rejects no source", () => {
+    expect(() => ExtractInputSchema.parse({})).toThrow(/exactly one/);
+  });
+  it("rejects two sources", () => {
+    expect(() => ExtractInputSchema.parse({ url: link, fileKey: "AbC123", nodeId: "1:2" })).toThrow(/exactly one/);
+  });
+  it("rejects fileKey without nodeId", () => {
+    expect(() => ExtractInputSchema.parse({ fileKey: "AbC123" })).toThrow(/nodeId/);
+  });
+  it("rejects a negative or fractional maxDepth", () => {
+    expect(() => ExtractInputSchema.parse({ url: link, maxDepth: -1 })).toThrow();
+    expect(() => ExtractInputSchema.parse({ url: link, maxDepth: 1.5 })).toThrow();
   });
 });
