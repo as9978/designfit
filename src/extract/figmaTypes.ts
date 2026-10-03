@@ -40,6 +40,7 @@ export interface FigmaNode {
   fills?: FigmaPaint[];
   strokes?: FigmaPaint[];
   strokeWeight?: number;
+  individualStrokeWeights?: { top: number; right: number; bottom: number; left: number }; // per-side; overrides strokeWeight
   cornerRadius?: number;
   rectangleCornerRadii?: [number, number, number, number]; // [tl, tr, br, bl]
   opacity?: number;
