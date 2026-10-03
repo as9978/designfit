@@ -52,6 +52,24 @@ describe("Claude Code plugin manifest", () => {
   });
 });
 
+describe("MCP Registry server.json", () => {
+  const server = read("server.json");
+
+  it("uses the registry name package.json declares as mcpName", () => {
+    expect(server.name).toBe(pkg.mcpName);
+  });
+
+  it("lists the same version for itself and its npm package", () => {
+    expect(server.version).toBe(pkg.version);
+    expect(server.packages[0].identifier).toBe(pkg.name);
+    expect(server.packages[0].version).toBe(pkg.version);
+  });
+
+  it("keeps the description within the registry's 100-character limit", () => {
+    expect(server.description.length).toBeLessThanOrEqual(100);
+  });
+});
+
 describe("Claude Code marketplace manifest", () => {
   it("lists the plugin under the name the plugin manifest declares", () => {
     const names = marketplace.plugins.map((p: { name: string }) => p.name);

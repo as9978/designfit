@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.as9978/designfit",
+  "title": "designfit",
+  "description": "Validate AI-built front-ends against Figma by tokens and geometry, not pixels.",
+  "repository": {
+    "url": "https://github.com/as9978/designfit",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/as9978/designfit#readme",
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "designfit",
+      "version": "0.2.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "FIGMA_TOKEN",
+          "description": "Figma personal access token. Lets designfit_extract fetch frames; without it, pass the /nodes JSON instead.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

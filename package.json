@@ -1,6 +1,7 @@
 {
   "name": "designfit",
   "version": "0.2.0",
+  "mcpName": "io.github.as9978/designfit",
   "description": "Validate AI-built front-ends against their Figma design — deterministic token + geometry conformance in an agent loop.",
   "keywords": [
     "mcp",
