@@ -24,3 +24,6 @@ docs/launch/
 
 # Local demo scaffolding — used to generate assets/hero.png + the release video; not public repo content
 demo/
+
+# MCP Registry publisher binary (downloaded locally)
+mcp-publisher.exe
