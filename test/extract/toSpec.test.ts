@@ -78,6 +78,12 @@ describe("nodeTokens", () => {
     const n: FigmaNode = { ...byId("1:3"), type: "VECTOR" };
     expect(nodeTokens(n)).toEqual({ borderRadius: 8 });
   });
+  it("takes the border from the top side when Figma has per-side stroke weights", () => {
+    const top: FigmaNode = { ...byId("1:3"), individualStrokeWeights: { top: 4, right: 0, bottom: 0, left: 0 } };
+    expect(nodeTokens(top)).toMatchObject({ borderColor: "#1e40af", borderWidth: 4 });
+    const bottomOnly: FigmaNode = { ...byId("1:3"), individualStrokeWeights: { top: 0, right: 0, bottom: 2, left: 0 } };
+    expect(nodeTokens(bottomOnly)).toEqual({ fill: "#1d4ed8", borderRadius: 8 });
+  });
   it("drops a stroke with zero weight", () => {
     const n: FigmaNode = { ...byId("1:3"), strokeWeight: 0 };
     expect(nodeTokens(n)).toEqual({ fill: "#1d4ed8", borderRadius: 8 });

@@ -45,8 +45,8 @@ describe("normalizeStyles", () => {
     expect(s.opacity).toBe(1);
   });
 
-  it("treats 'normal' letter-spacing as undefined", () => {
-    expect(normalizeStyles(raw).letterSpacing).toBeUndefined();
+  it("treats 'normal' letter-spacing as 0px", () => {
+    expect(normalizeStyles(raw).letterSpacing).toBe(0);
   });
 
   it("treats a zero-width border as no border color", () => {

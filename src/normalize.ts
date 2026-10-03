@@ -28,7 +28,8 @@ export function normalizeStyles(raw: RawComputed): ResolvedStyles {
     fontSize: parsePx(raw.fontSize),
     fontWeight: parsePx(raw.fontWeight),
     lineHeight: parsePx(raw.lineHeight),
-    letterSpacing: parsePx(raw.letterSpacing),
+    // CSS `normal` letter-spacing adds no space: it is 0px, unlike `normal` line-height, which depends on the font.
+    letterSpacing: raw.letterSpacing === "normal" ? 0 : parsePx(raw.letterSpacing),
     borderRadius: parsePx(raw.borderTopLeftRadius),
     borderColor: hasBorder ? colorOrUndefined(raw.borderTopColor) : undefined,
     borderWidth,

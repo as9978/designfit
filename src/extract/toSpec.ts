@@ -44,11 +44,17 @@ const VECTOR_TYPES = new Set(["VECTOR", "BOOLEAN_OPERATION", "LINE", "STAR", "RE
  */
 function nodePaints(node: FigmaNode): { fill?: PickedPaint; stroke?: PickedPaint } {
   if (VECTOR_TYPES.has(node.type) && node.type !== "LINE") return {};
-  const stroked = node.strokeWeight !== undefined && node.strokeWeight > 0;
+  const weight = topStrokeWeight(node);
+  const stroked = weight !== undefined && weight > 0;
   return {
     fill: topSolid(node.fills, node.boundVariables?.fills),
     stroke: stroked ? topSolid(node.strokes, node.boundVariables?.strokes) : undefined,
   };
+}
+
+/** The top border's width, the side `measure` reads (border-top). Per-side weights override the uniform one. */
+function topStrokeWeight(node: FigmaNode): number | undefined {
+  return node.individualStrokeWeights?.top ?? node.strokeWeight;
 }
 
 /** A text node's "fill" is its text color; a box's fill is its background. */
@@ -78,7 +84,7 @@ export function nodeTokens(node: FigmaNode): DesignTokens {
   if (radius !== undefined) t.borderRadius = radius;
   if (stroke) {
     t.borderColor = stroke.hex;
-    t.borderWidth = node.strokeWeight!;
+    t.borderWidth = topStrokeWeight(node)!;
   }
   if (node.opacity !== undefined && node.opacity !== 1) t.opacity = node.opacity;
   return t as DesignTokens;
@@ -87,6 +93,7 @@ export function nodeTokens(node: FigmaNode): DesignTokens {
 /** Figma scalar `boundVariables` key -> designfit token property. Paint aliases come from `nodePaints`. */
 const VARIABLE_KEYS: [string, TokenProperty][] = [
   ["strokeWeight", "borderWidth"],
+  ["strokeTopWeight", "borderWidth"],
   ["cornerRadius", "borderRadius"],
   ["topLeftRadius", "borderRadius"],
   ["opacity", "opacity"],
