@@ -69,7 +69,7 @@ async function toolResult(run: () => Promise<unknown>, toolName: string) {
 }
 
 export function createServer(): McpServer {
-  const server = new McpServer({ name: "designfit", version: "0.2.0" });
+  const server = new McpServer({ name: "designfit", version: "0.2.1" });
 
   server.registerTool(
     "designfit_validate",
