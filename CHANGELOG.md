@@ -3,6 +3,15 @@
 All notable changes to designfit. Pre-1.0, minors add features and patches fix bugs; the
 `designfit_validate` contract only gains optional fields.
 
+## 0.2.1 - 2026-10-03
+
+### Fixed
+
+- Extract reads Figma's per-side stroke weights (`individualStrokeWeights`). A bottom-only border
+  is no longer expected on top, and a 4px top border is no longer expected as 1px.
+- CSS `letter-spacing: normal` measures as 0px instead of no value, so Figma text with
+  `letterSpacing: 0` no longer raises a warning.
+
 ## 0.2.0 - 2026-10-03
 
 ### Added
