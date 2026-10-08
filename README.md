@@ -14,6 +14,8 @@ A real run on a 360-node Figma frame: `designfit_extract` reads the frame from i
 
 Screenshot-diffing an AI-built UI against a Figma frame thrashes: anti-aliasing and sub-pixel shifts read as "still wrong," so the agent fixes forever. designfit compares what a designer actually catches — wrong colors, wrong sizes, misalignment, missing elements — as **deterministic measurements with explicit tolerances**. Same input, same output, no oscillation.
 
+The long version: [Why screenshot-diffing AI-built UIs thrashes, and how geometry fixes it](https://dev.to/as9978/why-screenshot-diffing-ai-built-uis-thrashes-and-how-geometry-fixes-it-5967).
+
 ## Install
 
 **Claude Code — as a plugin:**
